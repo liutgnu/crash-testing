@@ -1,0 +1,4 @@
+DUMPLIST_START
+5.1.0-0.rc1.1.elrdy_IKCONFIG/vmlinux.gz 5.1.0-0.rc1.1.elrdy_IKCONFIG/vmcore
+3.10.0-693.17.1.el7_vmap_area_NULL_link/vmcore 3.10.0-693.17.1.el7_vmap_area_NULL_link/vmlinux.gz
+DUMPLIST_END

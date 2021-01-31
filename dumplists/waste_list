@@ -1,0 +1,16 @@
+DUMPLIST_START
+5.1.0-0.rc1.1.elrdy_IKCONFIG/vmlinux.gz 5.1.0-0.rc1.1.elrdy_IKCONFIG/vmcore
+3.10.0-693.17.1.el7_vmap_area_NULL_link/vmcore 3.10.0-693.17.1.el7_vmap_area_NULL_link/vmlinux.gz
+5.0.0_NT_VMCORE_DD_compressed_kdump/vmcore 5.0.0_NT_VMCORE_DD_compressed_kdump/vmlinux.gz
+5.0.0_NT_VMCORE_DD_ELF_kdump/vmcore 5.0.0_NT_VMCORE_DD_ELF_kdump/vmlinux.gz
+5.2.0-0.rc1.1.elrdy_sysrq-C/vmcore1 5.2.0-0.rc1.1.elrdy_sysrq-C/vmlinux.gz
+5.2.0-0.rc1.1.elrdy_sysrq-C/vmcore4 5.2.0-0.rc1.1.elrdy_sysrq-C/vmlinux.gz
+5.2.0-0.rc2.1.elrdy_usex_e_b/vmcore_b 5.2.0-0.rc2.1.elrdy_usex_e_b/vmlinux.gz
+5.2.0-0.rc2.1.elrdy_usex_e_b/vmcore_e 5.2.0-0.rc2.1.elrdy_usex_e_b/vmlinux.gz
+4.18.0-115.el8_SME_bz1730143/vmcore.1 4.18.0-115.el8_SME_bz1730143/vmlinux.gz
+4.18.0-115.el8_SME_bz1730143/vmcore.2 4.18.0-115.el8_SME_bz1730143/vmlinux.gz
+4.18.0-115.el8_SME_bz1730143/vmcore.no_sme 4.18.0-115.el8_SME_bz1730143/vmlinux.gz
+5.3-rc1_SECTION_IS_EARLY_flag/vmcore 5.3-rc1_SECTION_IS_EARLY_flag/vmlinux.gz
+3.10.0-862.6.3.el7_log-a/30-CSX-BCN-APP-31-Snapshot25.vmsn 3.10.0-862.6.3.el7_log-a/vmlinux.gz
+4.18.0-185.el8/vmcore 4.18.0-185.el8/vmlinux.gz
+DUMPLIST_END

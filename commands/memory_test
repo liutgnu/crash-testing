@@ -1,0 +1,9 @@
+COMMANDS_START
+kmem -V
+kmem -z
+kmem -i
+struct page -o
+qstr -o
+dis -l sys_read 10
+q
+COMMANDS_END
