@@ -33,9 +33,7 @@ function print_useage()
     echo "-c [FILE]    Specify crash"
     echo "-d [DIR]     Specify top dir of vmcore(must)"
     echo "-D [FILE]    Specify dumpcore list file"
-    echo "             default search dumpcore list in $FILE_NAME"
     echo "-C [FILE]    Specify crash commands list file"
-    echo "             default search crash commands list in $FILE_NAME"
     echo "-a           (Not inplemented)Alive test"
     echo "-l           (Not inplemented)Local test"
     echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
@@ -80,13 +78,13 @@ if [[ $DUMP_FOLDER == "" ]]; then
     print_useage && exit 1
 fi
 
-if [ ! -f $DUMPLIST_FILE ]; then
+if [[ $DUMPLIST_FILE == "" || ! -f $DUMPLIST_FILE ]]; then
     echo "Error dumpfile list not exist!" 1>&2
     exit 1
 fi
 DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
 
-if [ ! -f $COMMANDS_FILE ]; then
+if [[ $COMMANDS_FILE == "" || ! -f $COMMANDS_FILE ]]; then
     echo "Error commands list not exist!" 1>&2
     exit 1
 fi
