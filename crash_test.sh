@@ -8,11 +8,13 @@ THIS_FILE=$CURRENT_DIR/$FILE_NAME
 # Junk output for recording the specific output of 
 # a specific combination of CRASH command list and vmcore dump.  
 CRASH_PERSISTENT_OUTPUT="/tmp/crash.log"
-CRASH_JUNK_OUTPUT="/tmp/crash_junk.log"
+CRASH_JUNK_OUTPUT="/tmp/.crash_junk.log"
 CRASH2_PERSISTENT_OUTPUT="/tmp/crash2.log"
-CRASH2_JUNK_OUTPUT="/tmp/crash2_junk.log"
-SUMMARY_OUTPUT="/tmp/crash_summary.log"
+CRASH2_JUNK_OUTPUT="/tmp/.crash2_junk.log"
 DUMP_FOLDER=""
+COUNT=0
+VERBOSE_MODE=FALSE
+DIFF_TOOL=""
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
@@ -32,18 +34,19 @@ function print_useage()
     echo
     echo "-c [FILE]    Specify crash"
     echo "-d [DIR]     Specify top dir of vmcore(must)"
-    echo "-D [FILE]    Specify dumpcore list file"
-    echo "-C [FILE]    Specify crash commands list file"
+    echo "-D [FILE]    Specify dumpcore list file(must)"
+    echo "-C [FILE]    Specify crash commands list file(must)"
     echo "-a           (Not inplemented)Alive test"
     echo "-l           (Not inplemented)Local test"
     echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
     echo "-t           Time each test"
     echo "-s           Stop on failure"
-    echo "-e [FILE]    Specify another crash for behaviour comparison"
+    echo "-m           More verbose log output"
+    echo "-e [FILE]    Specify extra crash for behaviour comparison"
 }
 export -f print_useage
 
-while getopts "c:d:D:C:lavtse:" OPT; do
+while getopts "c:d:D:C:lavtsme:" OPT; do
     case $OPT in
         c) CRASH="$OPTARG"
             ;;
@@ -63,6 +66,8 @@ while getopts "c:d:D:C:lavtse:" OPT; do
         t) TIME_COMMAND="time -p"
             ;;
         s) USER_SET_STOP_ON_FAILURE=TRUE
+            ;;
+        m) VERBOSE_MODE=TRUE
             ;;
         e) CRASH2="$OPTARG"
             ;;
@@ -165,32 +170,43 @@ for FOLDER in ${CRASHRC_FOLDERS[@]}; do
 done
 ###############End check crashrc######################
 
+###############Start check difftools##################
+DIFF_TOOLS=("tkdiff")
+for TOOL in ${DIFF_TOOLS[@]}; do
+    DIFF_TOOL=$(which $TOOL 2>/dev/null)
+    if [ $? -eq 0 ]; then
+        break;
+    fi
+done
+###############End check difftools####################
+
 ###############Start loop preparation#################
 function invoke_crash()
 {
-    # $1:crash path, $2:persistent output log path, $3:junk output log path
+    # $1:crash path, $2:junk output log path
+    echo "[Test $COUNT]" > $2
     echo $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         tee -a $2
     cat $COMMANDS_FILE | \
         sed -n -e "$COMMANDS_START_LINE,"$COMMANDS_END_LINE"p" | \
         $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
-        tee -a $2 | \
-        tee $3
-    # We want return crash exit code
-    return ${PIPESTATUS[2]}
+        tee -a $2
+    # We want to log and return crash exit code
+    EXIT_VAL=${PIPESTATUS[2]}
+    echo "Crash returnd with $EXIT_VAL" | tee -a $2
+    return $EXIT_VAL
 }
 export -f invoke_crash
 
 function check_should_stop()
 {
-    if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ] && [ "$DO_NOT_STOP_ON_FAILURE" = "FALSE" ]; then \
+    if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ] && [ "$DO_NOT_STOP_ON_FAILURE" = "FALSE" ]; then
         exit 1
     fi
 }
 
 rm -f $CRASH_PERSISTENT_OUTPUT \
-    $CRASH2_PERSISTENT_OUTPUT \
-    $SUMMARY_OUTPUT
+    $CRASH2_PERSISTENT_OUTPUT
 cd $DUMP_FOLDER
 ###############End loop preparation###################
 
@@ -200,6 +216,7 @@ cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
 do
     FAILURE_FLAG=FALSE
     DO_NOT_STOP_ON_FAILURE=FALSE
+    COUNT=$(($COUNT + 1))
 
     # comment or empty lines
     if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
@@ -216,28 +233,46 @@ do
         continue
     fi
 
-    invoke_crash $CRASH $CRASH_PERSISTENT_OUTPUT $CRASH_JUNK_OUTPUT
-    EXIT_VAL=$?
-    if [ $EXIT_VAL -ne 0 ]; then
-        FAILURE_FLAG=TRUE
-    fi
-
-    # Here we compare the outputs of CRASH and CRASH2 are same or not.
-    if [[ ! $CRASH2 == "" ]]; then
-        invoke_crash $CRASH2 $CRASH2_PERSISTENT_OUTPUT $CRASH2_JUNK_OUTPUT
-        EXIT_VAL2=$?
-
-        # 1st check: the return value
-        if [ ! "$EXIT_VAL" == "$EXIT_VAL2" ]; then
-            echo "Exit value mismatch, got $EXIT_VAL <-> $EXIT_VAL2 !" | \
-                tee -a $SUMMARY_OUTPUT
+    echo "[Test $COUNT]"
+    if [[ $CRASH2 == "" ]]; then
+        invoke_crash $CRASH $CRASH_JUNK_OUTPUT
+        EXIT_VAL=$?
+        if [ $EXIT_VAL -ne 0 ]; then
             FAILURE_FLAG=TRUE
         fi
-        # 2nd check: the output junk
-        if [ ! "$(sum $CRASH_JUNK_OUTPUT)" == "$(sum $CRASH2_JUNK_OUTPUT)" ]; then
-            echo "Crash output mismatch, check diff in $CRASH_PERSISTENT_OUTPUT and $CRASH2_PERSISTENT_OUTPUT" | \
-                tee -a $SUMMARY_OUTPUT
+        if [[ $VERBOSE_MODE == TRUE || $FAILURE_FLAG == TRUE ]]; then
+            cat $CRASH_JUNK_OUTPUT >> $CRASH_PERSISTENT_OUTPUT
+        fi
+    else
+        # Here we compare the outputs of CRASH and CRASH2 are same or not.
+        invoke_crash $CRASH $CRASH_JUNK_OUTPUT
+        EXIT_VAL=$?
+        invoke_crash $CRASH2 $CRASH2_JUNK_OUTPUT
+        EXIT_VAL2=$?
+
+        # 1st check: the return value diff
+        if [ ! "$EXIT_VAL" == "$EXIT_VAL2" ]; then
+            echo "Exit values mismatch, got (CRASH-CRASH2): ($EXIT_VAL-$EXIT_VAL2)!" | \
+                tee -a $CRASH_JUNK_OUTPUT | \
+                tee -a $CRASH2_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
+        fi
+        # 2nd check: the return value == 0
+        if [[ ! $EXIT_VAL == 0 || ! $EXIT_VAL2 == 0 ]]; then
+            echo "Exit values are not 0, got (CRASH-CRASH2): ($EXIT_VAL-$EXIT_VAL2)!" | \
+                tee -a $CRASH_JUNK_OUTPUT | \
+                tee -a $CRASH2_JUNK_OUTPUT
+            FAILURE_FLAG=TRUE
+        fi
+        # 3rd check: the output junk
+        if [ ! "$(sum $CRASH_JUNK_OUTPUT)" == "$(sum $CRASH2_JUNK_OUTPUT)" ]; then
+            echo "Crash output mismatch, check diff in $CRASH_PERSISTENT_OUTPUT and $CRASH2_PERSISTENT_OUTPUT" 1>&2
+            FAILURE_FLAG=TRUE
+        fi
+        # If we are in debug mode or failure occured, persist the output log
+        if [[ $VERBOSE_MODE == TRUE || $FAILURE_FLAG == TRUE ]]; then
+            cat $CRASH_JUNK_OUTPUT >> $CRASH_PERSISTENT_OUTPUT
+            cat $CRASH2_JUNK_OUTPUT >> $CRASH2_PERSISTENT_OUTPUT
         fi
     fi
     
