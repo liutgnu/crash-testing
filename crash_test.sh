@@ -192,7 +192,6 @@ rm -f $CRASH_PERSISTENT_OUTPUT \
     $CRASH2_PERSISTENT_OUTPUT \
     $SUMMARY_OUTPUT
 cd $DUMP_FOLDER
-DO_NOT_STOP_ON_FAILURE=FALSE
 ###############End loop preparation###################
 
 ###############The loop ##############################
@@ -200,6 +199,7 @@ cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
     while read ARG1 ARG2 EXTRA_ARGS
 do
     FAILURE_FLAG=FALSE
+    DO_NOT_STOP_ON_FAILURE=FALSE
 
     # comment or empty lines
     if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
@@ -244,8 +244,6 @@ do
     if [[ $FAILURE_FLAG == TRUE ]]; then
         check_should_stop
     fi
-
-    DO_NOT_STOP_ON_FAILURE=FALSE
 done
 EXIT_VAL=$?
 ###############The loop end###########################
