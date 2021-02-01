@@ -285,20 +285,23 @@ EXIT_VAL=$?
 
 function popup_show_diff()
 {
-    if [[ ! $CRASH2 == "" ]]; then
-        echo "We use tkdiff to view log diff..."
-        tkdiff $CRASH_PERSISTENT_OUTPUT $CRASH2_PERSISTENT_OUTPUT
+    if [[ ! $CRASH2 == "" && -f $CRASH2_PERSISTENT_OUTPUT ]]; then
+        if [ ! DIFF_TOOL == "" ]; then
+            echo "Now invoke $DIFF_TOOL to present diff..."
+            $DIFF_TOOL $CRASH_PERSISTENT_OUTPUT $CRASH2_PERSISTENT_OUTPUT
+        else
+            echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\"" 1>&2
+        fi
     fi
 }
 export -f popup_show_diff
 
 cd ~-
+popup_show_diff
 if [ $EXIT_VAL -eq 0 ]; then
     echo "Crash test complete!"
-    popup_show_diff
     exit 0
 else
     echo "Crash test error occured, please check logs for details" 1>&2
-    popup_show_diff
     exit 1
 fi
