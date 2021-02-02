@@ -171,7 +171,7 @@ done
 ###############End check crashrc######################
 
 ###############Start check difftools##################
-DIFF_TOOLS=("tkdiff")
+DIFF_TOOLS=("tkdiff" "kdiff3" "meld" "kompare" "colordiff" "wdiff" "diff")
 for TOOL in ${DIFF_TOOLS[@]}; do
     DIFF_TOOL=$(which $TOOL 2>/dev/null)
     if [ $? -eq 0 ]; then
