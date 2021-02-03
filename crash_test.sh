@@ -198,6 +198,26 @@ done
 ###############End check difftools####################
 
 ###############Start merge commands###################
+function output_each_command_file()
+{
+    # $1: command file $2: output to file
+    ESCAPED_FILENAME=$(echo "$1" | sed 's/\//\\\//g')
+
+    # Since each command file start with COMMAND_START
+    # and end with exit/q and COMMAND_END. To combine different
+    # command files together, we need to remove each file's COMMAND_* and exit/q,
+    # which will be created elsewhere. Then we add "echo [Commandfile THE_COMMAND_FILE]"
+    # at the place of COMMAND_START, by which we can output command file name as a label. 
+    cat $1 | \
+        egrep -v "COMMAND_END" | \
+        sed "/COMMAND_START/s/^.*$/echo \"[Commandfile $ESCAPED_FILENAME]\"/" | \
+        sed '/^\s*\(exit\|q\)\s*$/d' \
+        >> $2
+}
+export -f output_each_command_file
+
+rm -f $MERGED_COMMANDS
+echo "COMMAND_START" > $MERGED_COMMANDS
 if [[ ! $COMMANDLIST_FILE == "" ]]; then
     # it's command list file
     COMMANDLIST_START_LINE=$(get_linenum_in_file $COMMANDLIST_FILE "COMMANDLIST_START")
@@ -206,9 +226,7 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
     COMMANDLIST_END_LINE=$(($COMMANDLIST_END_LINE - 1))
     check_line_results "COMMANDLIST" $COMMANDLIST_FILE
 
-    rm -f $MERGED_COMMANDS
     cd $COMMANDS_TOP_DIR
-    echo "COMMAND_START" > $MERGED_COMMANDS
     cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p" | \
         while read ARG1 EXTRA_ARGS
     do
@@ -226,19 +244,16 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
                 continue
             fi
         fi
-
-        cat $ARG1 | \
-            egrep -v "COMMAND_(START|END)" | \
-            sed '/^\s*\(exit\|q\)\s*$/d' \
-            >> $MERGED_COMMANDS
+        output_each_command_file $ARG1 $MERGED_COMMANDS
     done
-    echo "q" >> $MERGED_COMMANDS
-    echo "COMMAND_END" >> $MERGED_COMMANDS
     cd ~-
 else
     # it's command file
-    MERGED_COMMANDS=$COMMAND_FILE
+    output_each_command_file $COMMAND_FILE $MERGED_COMMANDS
 fi
+echo "q" >> $MERGED_COMMANDS
+echo "COMMAND_END" >> $MERGED_COMMANDS
+
 COMMAND_START_LINE=$(get_linenum_in_file $MERGED_COMMANDS "COMMAND_START")
 COMMAND_START_LINE=$(($COMMAND_START_LINE + 1))
 COMMAND_END_LINE=$(get_linenum_in_file $MERGED_COMMANDS "COMMAND_END")
@@ -251,6 +266,7 @@ function invoke_crash()
 {
     # $1:crash path, $2:junk output log path
     echo "[Test $DUMPLIST_INDEX]" > $2
+    echo "[Dumpfile $ARG1 $ARG2]" >> $2
     echo $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         tee -a $2
     cat $MERGED_COMMANDS | \
@@ -259,7 +275,7 @@ function invoke_crash()
         tee -a $2
     # We want to log and return crash exit code
     EXIT_VAL=${PIPESTATUS[2]}
-    echo "Crash returnd with $EXIT_VAL" | tee -a $2
+    echo -e "Crash returnd with $EXIT_VAL\n" | tee -a $2
     return $EXIT_VAL
 }
 export -f invoke_crash
@@ -306,6 +322,7 @@ do
     fi
 
     echo "[Test $DUMPLIST_INDEX]"
+    echo "[Dumpfile $ARG1 $ARG2]"
     if [[ $CRASH2 == "" ]]; then
         invoke_crash $CRASH $CRASH_JUNK_OUTPUT
         EXIT_VAL=$?
