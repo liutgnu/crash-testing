@@ -11,14 +11,17 @@ CRASH_PERSISTENT_OUTPUT="/tmp/crash.log"
 CRASH_JUNK_OUTPUT="/tmp/.crash_junk.log"
 CRASH2_PERSISTENT_OUTPUT="/tmp/crash2.log"
 CRASH2_JUNK_OUTPUT="/tmp/.crash2_junk.log"
-DUMP_FOLDER=""
-COUNT=0
+MERGED_COMMANDS="/tmp/.merged_commands.log"
+DUMPLIST_INDEX=0
+COMMANDLIST_INDEX=0
 VERBOSE_MODE=FALSE
 DIFF_TOOL=""
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
-COMMANDS_FILE=""
+DUMPCORE_TOP_DIR=""
+COMMANDLIST_FILE=""
+COMMANDS_TOP_DIR=$CURRENT_DIR
 DO_LIVE=FALSE
 DO_LOCAL=FALSE
 VERIFY=FALSE
@@ -32,10 +35,11 @@ function print_useage()
 {
     echo "Useage: $FILE_NAME [OPTS]..."
     echo
-    echo "-c [FILE]    Specify crash"
-    echo "-d [DIR]     Specify top dir of vmcore(must)"
-    echo "-D [FILE]    Specify dumpcore list file(must)"
-    echo "-C [FILE]    Specify crash commands list file(must)"
+    echo "-f [FILE]    Specify crash"
+    echo "-D [DIR]     Specify top dir of vmcore(must)"
+    echo "-d [FILE]    Specify dumpcore list file(must)"
+    echo "-C [DIR]     Specify top dir of commands, default to current dir"
+    echo "-c [FILE]    Specify crash commands list file(must)"
     echo "-a           (Not inplemented)Alive test"
     echo "-l           (Not inplemented)Local test"
     echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
@@ -46,15 +50,17 @@ function print_useage()
 }
 export -f print_useage
 
-while getopts "c:d:D:C:lavtsme:" OPT; do
+while getopts "f:d:D:C:c:alvtsme:" OPT; do
     case $OPT in
-        c) CRASH="$OPTARG"
+        f) CRASH="$OPTARG"
             ;;
-        D) DUMPLIST_FILE="$OPTARG"
+        d) DUMPLIST_FILE="$OPTARG"
             ;;
-        d) DUMP_FOLDER="$OPTARG"
+        D) DUMPCORE_TOP_DIR="$OPTARG"
             ;;
-        C) COMMANDS_FILE="$OPTARG"
+        c) COMMANDLIST_FILE="$OPTARG"
+            ;;
+        C) COMMANDS_TOP_DIR="$OPTARG"
             ;;
         a) DO_LIVE=TRUE
             SUDO="sudo"
@@ -79,7 +85,7 @@ done
 trap "echo 'The program is terminated by user.' && exit 0" SIGTERM SIGINT
 
 ###############Start check inputs####################
-if [[ $DUMP_FOLDER == "" ]]; then
+if [[ $DUMPCORE_TOP_DIR == "" ]]; then
     print_useage && exit 1
 fi
 
@@ -89,11 +95,11 @@ if [[ $DUMPLIST_FILE == "" || ! -f $DUMPLIST_FILE ]]; then
 fi
 DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
 
-if [[ $COMMANDS_FILE == "" || ! -f $COMMANDS_FILE ]]; then
+if [[ $COMMANDLIST_FILE == "" || ! -f $COMMANDLIST_FILE ]]; then
     echo "Error commands list not exist!" 1>&2
     exit 1
 fi
-COMMANDS_FILE=$(readlink -f $COMMANDS_FILE)
+COMMANDLIST_FILE=$(readlink -f $COMMANDLIST_FILE)
 
 if [ ! -x $CRASH ]; then
     echo "Error crash path $CRASH not exist or executable!" 1>&2
@@ -110,7 +116,7 @@ if [[ ! $CRASH2 == "" ]]; then
     echo "We are using crash2 path $CRASH2..."
 fi
 
-function check_list_file_format()
+function check_line_results()
 {
     # $1: DUMPLIST or COMMANDS
     VAR1="$1"_START_LINE
@@ -128,23 +134,23 @@ function check_list_file_format()
         exit 1
     fi
 }
-export -f check_list_file_format
+export -f check_line_results
 
 # If the following value is 1 or -1, then indicate strings as 
-# "DUMPLIST_START" "DUMPLIST_END" not exist, so it's error format,
-# checked in function check_list_file_format
+# "DUMPLIST_START" "DUMPLIST_END" not exist, so it's abnormal,
+# checked in function check_line_results
 DUMPLIST_START_LINE=`awk -v str="DUMPLIST_START" '{if($0==str){print NR}}' $DUMPLIST_FILE`
 DUMPLIST_START_LINE=$(($DUMPLIST_START_LINE + 1))
 DUMPLIST_END_LINE=`awk -v str="DUMPLIST_END" '{if($0==str){print NR}}' $DUMPLIST_FILE`
 DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
-COMMANDS_START_LINE=`awk -v str="COMMANDS_START" '{if($0==str){print NR}}' $COMMANDS_FILE`
-COMMANDS_START_LINE=$(($COMMANDS_START_LINE + 1))
-COMMANDS_END_LINE=`awk -v str="COMMANDS_END" '{if($0==str){print NR}}' $COMMANDS_FILE`
-COMMANDS_END_LINE=$(($COMMANDS_END_LINE - 1))
+COMMANDLIST_START_LINE=`awk -v str="COMMANDLIST_START" '{if($0==str){print NR}}' $COMMANDLIST_FILE`
+COMMANDLIST_START_LINE=$(($COMMANDLIST_START_LINE + 1))
+COMMANDLIST_END_LINE=`awk -v str="COMMANDLIST_END" '{if($0==str){print NR}}' $COMMANDLIST_FILE`
+COMMANDLIST_END_LINE=$(($COMMANDLIST_END_LINE - 1))
 
-check_list_file_format "DUMPLIST"
-check_list_file_format "COMMANDS"
-###############Done check inputs#####################
+check_line_results "DUMPLIST"
+check_line_results "COMMANDLIST"
+###############Done check inputs######################
 
 ###############Start check crashrc####################
 function check_crashrc()
@@ -180,15 +186,52 @@ for TOOL in ${DIFF_TOOLS[@]}; do
 done
 ###############End check difftools####################
 
+###############Start merge commands###################
+rm -f $MERGED_COMMANDS
+cd $COMMANDS_TOP_DIR
+echo "COMMAND_START" > $MERGED_COMMANDS
+cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p" | \
+    while read ARG1 EXTRA_ARGS
+do
+    # comment or empty lines
+    if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
+        continue
+    fi
+    # check file exist
+    if [ ! -f $ARG1 ]; then
+        echo "Error: command module $COMMANDS_TOP_DIR/$ARG1 not found!" 1>&2
+        if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ]; then
+            exit 1
+        else
+            echo "Stop on failure not set, continuing..." 1>&2
+            continue
+        fi
+    fi
+
+    cat $ARG1 | \
+        egrep -v "COMMAND_(START|END)" | \
+        sed '/^\s*\(exit\|q\)\s*$/d' \
+        >> $MERGED_COMMANDS
+done
+echo "q" >> $MERGED_COMMANDS
+echo "COMMAND_END" >> $MERGED_COMMANDS
+
+COMMAND_START_LINE=`awk -v str="COMMAND_START" '{if($0==str){print NR}}' $MERGED_COMMANDS`
+COMMAND_START_LINE=$(($COMMAND_START_LINE + 1))
+COMMAND_END_LINE=`awk -v str="COMMAND_END" '{if($0==str){print NR}}' $MERGED_COMMANDS`
+COMMAND_END_LINE=$(($COMMAND_END_LINE - 1))
+cd ~-
+###############End merge commands#####################
+
 ###############Start loop preparation#################
 function invoke_crash()
 {
     # $1:crash path, $2:junk output log path
-    echo "[Test $COUNT]" > $2
+    echo "[Test $DUMPLIST_INDEX]" > $2
     echo $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         tee -a $2
-    cat $COMMANDS_FILE | \
-        sed -n -e "$COMMANDS_START_LINE,"$COMMANDS_END_LINE"p" | \
+    cat $MERGED_COMMANDS | \
+        sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | \
         $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         tee -a $2
     # We want to log and return crash exit code
@@ -207,7 +250,7 @@ function check_should_stop()
 
 rm -f $CRASH_PERSISTENT_OUTPUT \
     $CRASH2_PERSISTENT_OUTPUT
-cd $DUMP_FOLDER
+cd $DUMPCORE_TOP_DIR
 ###############End loop preparation###################
 
 ###############The loop ##############################
@@ -216,7 +259,7 @@ cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
 do
     FAILURE_FLAG=FALSE
     DO_NOT_STOP_ON_FAILURE=FALSE
-    COUNT=$(($COUNT + 1))
+    DUMPLIST_INDEX=$(($DUMPLIST_INDEX + 1))
 
     # comment or empty lines
     if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
@@ -233,7 +276,7 @@ do
         continue
     fi
 
-    echo "[Test $COUNT]"
+    echo "[Test $DUMPLIST_INDEX]"
     if [[ $CRASH2 == "" ]]; then
         invoke_crash $CRASH $CRASH_JUNK_OUTPUT
         EXIT_VAL=$?
