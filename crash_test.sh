@@ -334,21 +334,25 @@ do
         fi
     else
         # Here we compare the outputs of CRASH and CRASH2 are same or not.
-        invoke_crash $CRASH $CRASH_JUNK_OUTPUT
-        EXIT_VAL=$?
-        invoke_crash $CRASH2 $CRASH2_JUNK_OUTPUT
-        EXIT_VAL2=$?
-
+        # By put crash and crash2 into background will shorten the overall time.
+        invoke_crash $CRASH $CRASH_JUNK_OUTPUT &
+        PID[0]=$!
+        invoke_crash $CRASH2 $CRASH2_JUNK_OUTPUT &
+        PID[1]=$!
+        for ((i=0;i<2;i++)); do
+            wait -n ${PID[$i]}
+            EXIT_VAL[$i]=$?
+        done
         # 1st check: the return value diff
-        if [ ! "$EXIT_VAL" == "$EXIT_VAL2" ]; then
-            echo "Exit values mismatch, got (CRASH-CRASH2): ($EXIT_VAL-$EXIT_VAL2)!" | \
+        if [ ! "${EXIT_VAL[0]}" == "${EXIT_VAL[1]}" ]; then
+            echo "Exit values mismatch, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
                 tee -a $CRASH_JUNK_OUTPUT | \
                 tee -a $CRASH2_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
         fi
         # 2nd check: the return value == 0
-        if [[ ! $EXIT_VAL == 0 || ! $EXIT_VAL2 == 0 ]]; then
-            echo "Exit values are not 0, got (CRASH-CRASH2): ($EXIT_VAL-$EXIT_VAL2)!" | \
+        if [[ ! ${EXIT_VAL[0]} == 0 || ! ${EXIT_VAL[1]} == 0 ]]; then
+            echo "Exit values are not 0, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
                 tee -a $CRASH_JUNK_OUTPUT | \
                 tee -a $CRASH2_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
