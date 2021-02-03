@@ -21,6 +21,7 @@ CRASH=$(which crash)
 DUMPLIST_FILE=""
 DUMPCORE_TOP_DIR=""
 COMMANDLIST_FILE=""
+COMMAND_FILE=""
 COMMANDS_TOP_DIR=$CURRENT_DIR
 DO_LIVE=FALSE
 DO_LOCAL=FALSE
@@ -39,7 +40,9 @@ function print_useage()
     echo "-D [DIR]     Specify top dir of vmcore(must)"
     echo "-d [FILE]    Specify dumpcore list file(must)"
     echo "-C [DIR]     Specify top dir of commands, default to current dir"
-    echo "-c [FILE]    Specify crash commands list file(must)"
+    echo "-c [FILE]    Specify crash commands list file"
+    echo "-b [FILE]    Specify crash commands file"
+    echo "                  One of -c and -b is a (must)"
     echo "-a           (Not inplemented)Alive test"
     echo "-l           (Not inplemented)Local test"
     echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
@@ -50,7 +53,7 @@ function print_useage()
 }
 export -f print_useage
 
-while getopts "f:d:D:C:c:alvtsme:" OPT; do
+while getopts "f:d:D:C:c:b:alvtsme:" OPT; do
     case $OPT in
         f) CRASH="$OPTARG"
             ;;
@@ -61,6 +64,8 @@ while getopts "f:d:D:C:c:alvtsme:" OPT; do
         c) COMMANDLIST_FILE="$OPTARG"
             ;;
         C) COMMANDS_TOP_DIR="$OPTARG"
+            ;;
+        b) COMMAND_FILE="$OPTARG"
             ;;
         a) DO_LIVE=TRUE
             SUDO="sudo"
@@ -95,11 +100,23 @@ if [[ $DUMPLIST_FILE == "" || ! -f $DUMPLIST_FILE ]]; then
 fi
 DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
 
-if [[ $COMMANDLIST_FILE == "" || ! -f $COMMANDLIST_FILE ]]; then
-    echo "Error commands list not exist!" 1>&2
-    exit 1
+if [[ ! $COMMAND_FILE == "" && -f $COMMAND_FILE ]]; then
+    COMMAND_FILE=$(readlink -f $COMMAND_FILE)
 fi
-COMMANDLIST_FILE=$(readlink -f $COMMANDLIST_FILE)
+
+if [[ ! $COMMANDLIST_FILE == "" && -f $COMMANDLIST_FILE ]]; then
+    COMMANDLIST_FILE=$(readlink -f $COMMANDLIST_FILE)
+fi
+
+if [[ $COMMAND_FILE == "" && $COMMANDLIST_FILE == "" ]]; then
+    echo "Error no command list file(-c) nor command file(-b) exist" 1>&2
+    print_useage && exit 1
+fi
+
+if [[ ! $COMMAND_FILE == "" && ! $COMMANDLIST_FILE == "" ]]; then
+    echo "Error command list file(-c) and command file(-b) both exist!" 1>&2
+    print_useage && exit 1
+fi
 
 if [ ! -x $CRASH ]; then
     echo "Error crash path $CRASH not exist or executable!" 1>&2
@@ -118,12 +135,11 @@ fi
 
 function check_line_results()
 {
-    # $1: DUMPLIST or COMMANDS
+    # $1: the string $2: filename
     VAR1="$1"_START_LINE
     VAR2="$1"_END_LINE
-    FILE="$1"_FILE
     if [[ ${!VAR1} == "1" || ${!VAR2} == "-1" ]]; then
-        echo "Error $(readlink -f ${!FILE}) file format" 1>&2
+        echo "Error $(readlink -f $2) file format" 1>&2
         echo 1>&2
         echo "Example:" 1>&2
         echo "$1_START" 1>&2
@@ -139,17 +155,12 @@ export -f check_line_results
 # If the following value is 1 or -1, then indicate strings as 
 # "DUMPLIST_START" "DUMPLIST_END" not exist, so it's abnormal,
 # checked in function check_line_results
-DUMPLIST_START_LINE=`awk -v str="DUMPLIST_START" '{if($0==str){print NR}}' $DUMPLIST_FILE`
-DUMPLIST_START_LINE=$(($DUMPLIST_START_LINE + 1))
-DUMPLIST_END_LINE=`awk -v str="DUMPLIST_END" '{if($0==str){print NR}}' $DUMPLIST_FILE`
-DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
-COMMANDLIST_START_LINE=`awk -v str="COMMANDLIST_START" '{if($0==str){print NR}}' $COMMANDLIST_FILE`
-COMMANDLIST_START_LINE=$(($COMMANDLIST_START_LINE + 1))
-COMMANDLIST_END_LINE=`awk -v str="COMMANDLIST_END" '{if($0==str){print NR}}' $COMMANDLIST_FILE`
-COMMANDLIST_END_LINE=$(($COMMANDLIST_END_LINE - 1))
-
-check_line_results "DUMPLIST"
-check_line_results "COMMANDLIST"
+function get_linenum_in_file()
+{
+    # $1: file name, $2: string
+    awk -v str="$2" '{if($0==str){print NR}}' $1
+}
+export -f get_linenum_in_file
 ###############Done check inputs######################
 
 ###############Start check crashrc####################
@@ -187,40 +198,52 @@ done
 ###############End check difftools####################
 
 ###############Start merge commands###################
-rm -f $MERGED_COMMANDS
-cd $COMMANDS_TOP_DIR
-echo "COMMAND_START" > $MERGED_COMMANDS
-cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p" | \
-    while read ARG1 EXTRA_ARGS
-do
-    # comment or empty lines
-    if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
-        continue
-    fi
-    # check file exist
-    if [ ! -f $ARG1 ]; then
-        echo "Error: command module $COMMANDS_TOP_DIR/$ARG1 not found!" 1>&2
-        if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ]; then
-            exit 1
-        else
-            echo "Stop on failure not set, continuing..." 1>&2
+if [[ ! $COMMANDLIST_FILE == "" ]]; then
+    # it's command list file
+    COMMANDLIST_START_LINE=$(get_linenum_in_file $COMMANDLIST_FILE "COMMANDLIST_START")
+    COMMANDLIST_START_LINE=$(($COMMANDLIST_START_LINE + 1))
+    COMMANDLIST_END_LINE=$(get_linenum_in_file $COMMANDLIST_FILE "COMMANDLIST_END")
+    COMMANDLIST_END_LINE=$(($COMMANDLIST_END_LINE - 1))
+    check_line_results "COMMANDLIST" $COMMANDLIST_FILE
+
+    rm -f $MERGED_COMMANDS
+    cd $COMMANDS_TOP_DIR
+    echo "COMMAND_START" > $MERGED_COMMANDS
+    cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p" | \
+        while read ARG1 EXTRA_ARGS
+    do
+        # comment or empty lines
+        if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
             continue
         fi
-    fi
+        # check file exist
+        if [ ! -f $ARG1 ]; then
+            echo "Error: command file $COMMANDS_TOP_DIR/$ARG1 not found!" 1>&2
+            if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ]; then
+                exit 1
+            else
+                echo "Stop on failure not set, continuing..." 1>&2
+                continue
+            fi
+        fi
 
-    cat $ARG1 | \
-        egrep -v "COMMAND_(START|END)" | \
-        sed '/^\s*\(exit\|q\)\s*$/d' \
-        >> $MERGED_COMMANDS
-done
-echo "q" >> $MERGED_COMMANDS
-echo "COMMAND_END" >> $MERGED_COMMANDS
-
-COMMAND_START_LINE=`awk -v str="COMMAND_START" '{if($0==str){print NR}}' $MERGED_COMMANDS`
+        cat $ARG1 | \
+            egrep -v "COMMAND_(START|END)" | \
+            sed '/^\s*\(exit\|q\)\s*$/d' \
+            >> $MERGED_COMMANDS
+    done
+    echo "q" >> $MERGED_COMMANDS
+    echo "COMMAND_END" >> $MERGED_COMMANDS
+    cd ~-
+else
+    # it's command file
+    MERGED_COMMANDS=$COMMAND_FILE
+fi
+COMMAND_START_LINE=$(get_linenum_in_file $MERGED_COMMANDS "COMMAND_START")
 COMMAND_START_LINE=$(($COMMAND_START_LINE + 1))
-COMMAND_END_LINE=`awk -v str="COMMAND_END" '{if($0==str){print NR}}' $MERGED_COMMANDS`
+COMMAND_END_LINE=$(get_linenum_in_file $MERGED_COMMANDS "COMMAND_END")
 COMMAND_END_LINE=$(($COMMAND_END_LINE - 1))
-cd ~-
+check_line_results "COMMAND" $MERGED_COMMANDS
 ###############End merge commands#####################
 
 ###############Start loop preparation#################
@@ -254,6 +277,12 @@ cd $DUMPCORE_TOP_DIR
 ###############End loop preparation###################
 
 ###############The loop ##############################
+DUMPLIST_START_LINE=$(get_linenum_in_file $DUMPLIST_FILE "DUMPLIST_START")
+DUMPLIST_START_LINE=$(($DUMPLIST_START_LINE + 1))
+DUMPLIST_END_LINE=$(get_linenum_in_file $DUMPLIST_FILE "DUMPLIST_END")
+DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
+check_line_results "DUMPLIST" $DUMPLIST_FILE
+
 cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
     while read ARG1 ARG2 EXTRA_ARGS
 do

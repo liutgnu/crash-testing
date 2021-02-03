@@ -1,4 +1,4 @@
 COMMANDLIST_START
-command_module/get_nodename
-command_module/memory_test
+command/get_nodename
+command/memory_test
 COMMANDLIST_END
