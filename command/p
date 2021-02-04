@@ -1,0 +1,4 @@
+COMMAND_START
+p linux_banner
+q
+COMMAND_END

@@ -1,0 +1,6 @@
+COMMAND_START
+net
+net -a
+net -s 1
+q
+COMMAND_END

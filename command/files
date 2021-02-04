@@ -1,0 +1,5 @@
+COMMAND_START
+files
+files -c
+q
+COMMAND_END

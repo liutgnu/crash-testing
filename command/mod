@@ -1,0 +1,10 @@
+COMMAND_START
+mod
+mod -t
+mod -S
+#mod -r
+#mod -R
+#mod -o
+#mod -g
+q
+COMMAND_END

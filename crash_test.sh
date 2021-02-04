@@ -36,7 +36,7 @@ function print_useage()
 {
     echo "Useage: $FILE_NAME [OPTS]..."
     echo
-    echo "-f [FILE]    Specify crash"
+    echo "-f [FILE]    Specify crash, default is \"$(which crash)\" if crash installed"
     echo "-D [DIR]     Specify top dir of vmcore(must)"
     echo "-d [FILE]    Specify dumpcore list file(must)"
     echo "-C [DIR]     Specify top dir of commands, default to current dir"
@@ -379,7 +379,7 @@ EXIT_VAL=$?
 function popup_show_diff()
 {
     if [[ ! $CRASH2 == "" && -f $CRASH2_PERSISTENT_OUTPUT ]]; then
-        if [ ! DIFF_TOOL == "" ]; then
+        if [ ! $DIFF_TOOL == "" ]; then
             echo "Now invoke $DIFF_TOOL to present diff..."
             $DIFF_TOOL $CRASH_PERSISTENT_OUTPUT $CRASH2_PERSISTENT_OUTPUT
         else

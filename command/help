@@ -1,0 +1,31 @@
+COMMAND_START
+help
+help -a
+help -b
+help -B
+help -c
+help -d
+help -D
+help -e
+help -f
+help -g
+help -h
+help -H
+help -k
+help -K
+help -L
+help -m
+help -n
+help -N
+help -o
+help -p
+help -r
+help -s
+help -t
+help -T
+help -v
+help -V
+help -x
+help -z
+q
+COMMAND_END

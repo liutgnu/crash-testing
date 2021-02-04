@@ -1,0 +1,6 @@
+COMMAND_START
+mach
+mach -m
+mach -c
+q
+COMMAND_END

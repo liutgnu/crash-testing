@@ -1,0 +1,17 @@
+COMMAND_START
+kmem -f
+kmem -c
+kmem -C
+kmem -i
+kmem -v
+kmem -V
+kmem -n
+kmem -z
+kmem -o
+kmem -h
+kmem -s
+kmem -S TCP
+kmem -r
+kmem -g
+q
+COMMAND_END

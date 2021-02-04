@@ -1,0 +1,9 @@
+COMMAND_START
+dev
+dev -i
+dev -p
+dev -d
+dev -D
+dev -V
+q
+COMMAND_END

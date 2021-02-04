@@ -1,0 +1,9 @@
+COMMAND_START
+log
+log -T
+log -t
+log -d
+log -m
+log -a
+q
+COMMAND_END

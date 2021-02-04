@@ -1,0 +1,8 @@
+COMMAND_START
+sys
+sys -c
+sys -t
+sys -i
+sys config
+q
+COMMAND_END

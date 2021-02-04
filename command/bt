@@ -1,0 +1,23 @@
+COMMAND_START
+bt
+bt -a
+bt -c 0
+bt -g
+bt -r
+bt -t
+bt -T
+bt -l
+bt -e
+bt -E
+bt -f
+bt -F
+bt -FF
+bt -o
+#bt -O
+bt -v
+bt -p
+bt -s
+bt -sx
+foreach bt
+q
+COMMAND_END

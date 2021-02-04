@@ -1,0 +1,5 @@
+COMMAND_START
+sym schedule
+sym -p -n schedule
+q
+COMMAND_END

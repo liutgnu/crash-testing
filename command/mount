@@ -1,0 +1,6 @@
+COMMAND_START
+mount
+mount -f
+mount -i
+q
+COMMAND_END

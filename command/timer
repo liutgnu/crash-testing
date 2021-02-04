@@ -1,0 +1,5 @@
+COMMAND_START
+timer
+timer -r
+q
+COMMAND_END

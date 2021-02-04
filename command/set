@@ -1,0 +1,5 @@
+COMMAND_START
+set
+set -v
+q
+COMMAND_END

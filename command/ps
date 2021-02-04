@@ -1,0 +1,19 @@
+COMMAND_START
+ps
+ps -k
+ps -u
+ps -G
+ps -s
+ps -p
+ps -c
+ps -t
+ps -l
+ps -m
+ps -m -C 0
+ps -a
+ps -g
+ps -r
+ps -S
+ps -A
+q
+COMMAND_END

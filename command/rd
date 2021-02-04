@@ -1,0 +1,4 @@
+COMMAND_START
+rd -8 linux_banner 256
+q
+COMMAND_END

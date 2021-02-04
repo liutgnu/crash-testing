@@ -1,0 +1,6 @@
+COMMAND_START
+bpf
+bpf -PM
+bpf -PM -jTs
+q
+COMMAND_END

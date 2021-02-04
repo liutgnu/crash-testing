@@ -1,0 +1,5 @@
+COMMAND_START
+vm
+vm -m
+q
+COMMAND_END

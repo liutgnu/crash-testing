@@ -1,0 +1,6 @@
+COMMAND_START
+sig
+sig -l
+sig -g
+q
+COMMAND_END

@@ -1,0 +1,6 @@
+COMMAND_START
+dis schedule
+dis -l schedule
+dis -s schedule
+q
+COMMAND_END

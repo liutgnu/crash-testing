@@ -1,0 +1,8 @@
+COMMAND_START
+irq
+irq -d
+irq -b
+irq -a
+irq -s
+q
+COMMAND_END
