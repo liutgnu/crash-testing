@@ -1,0 +1,7 @@
+COMMANDLIST_START
+command/files_long
+command/kmem_long
+command/net_long
+command/sym_long
+command/vm_long
+COMMANDLIST_END

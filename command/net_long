@@ -1,0 +1,5 @@
+COMMAND_START
+net -S
+foreach net -s
+q
+COMMAND_END

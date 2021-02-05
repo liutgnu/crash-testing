@@ -1,0 +1,4 @@
+COMMAND_START
+foreach files
+q
+COMMAND_END

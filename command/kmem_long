@@ -1,0 +1,5 @@
+COMMAND_START
+kmem -F
+kmem -p
+q
+COMMAND_END
