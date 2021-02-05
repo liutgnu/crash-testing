@@ -29,7 +29,7 @@ VERIFY=FALSE
 TIME_COMMAND=""
 CRASH2=""
 SUDO=""
-OPTARGS="-s"
+OPTARGS="-s "
 USER_SET_STOP_ON_FAILURE=FALSE
 
 function print_useage()
@@ -50,10 +50,11 @@ function print_useage()
     echo "-s           Stop on failure"
     echo "-m           More verbose log output"
     echo "-e [FILE]    Specify extra crash for behaviour comparison"
+    echo "-o [OPTS]    Specify options for crash (and for extra crash as well if -e exist)"
 }
 export -f print_useage
 
-while getopts "f:d:D:C:c:b:alvtsme:" OPT; do
+while getopts "f:d:D:C:c:b:alvtsme:o:" OPT; do
     case $OPT in
         f) CRASH="$OPTARG"
             ;;
@@ -81,6 +82,8 @@ while getopts "f:d:D:C:c:b:alvtsme:" OPT; do
         m) VERBOSE_MODE=TRUE
             ;;
         e) CRASH2="$OPTARG"
+            ;;
+        o) OPTARGS="$OPTARGS""$OPTARG"
             ;;
         *) print_useage && exit 1
             ;;
