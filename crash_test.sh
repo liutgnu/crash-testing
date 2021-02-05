@@ -16,6 +16,8 @@ DUMPLIST_INDEX=0
 COMMANDLIST_INDEX=0
 VERBOSE_MODE=FALSE
 DIFF_TOOL=""
+TIMESTAMP='{print strftime("%F %T"),$0;fflush()}'
+TIMEDELTA='BEGIN{t=systime()}{s=systime();printf("% 3d %s\n",s-t,$0);t=s;fflush()}'
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
@@ -26,7 +28,7 @@ COMMANDS_TOP_DIR=$CURRENT_DIR
 DO_LIVE=FALSE
 DO_LOCAL=FALSE
 VERIFY=FALSE
-TIME_COMMAND=""
+TIME_COMMAND='{print $0}'
 CRASH2=""
 SUDO=""
 OPTARGS="-s "
@@ -46,7 +48,8 @@ function print_useage()
     echo "-a           (Not inplemented)Alive test"
     echo "-l           (Not inplemented)Local test"
     echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
-    echo "-t           Time each test"
+    echo "-t           Print timestamp"
+    echo "-T           Print timedelta"
     echo "-s           Stop on failure"
     echo "-m           More verbose log output"
     echo "-e [FILE]    Specify extra crash for behaviour comparison"
@@ -54,7 +57,7 @@ function print_useage()
 }
 export -f print_useage
 
-while getopts "f:d:D:C:c:b:alvtsme:o:" OPT; do
+while getopts "f:d:D:C:c:b:alvtTsme:o:" OPT; do
     case $OPT in
         f) CRASH="$OPTARG"
             ;;
@@ -75,7 +78,9 @@ while getopts "f:d:D:C:c:b:alvtsme:o:" OPT; do
 	        ;;
 	    v) VERIFY=TRUE
 	        ;;
-        t) TIME_COMMAND="time -p"
+        t) TIME_COMMAND=$TIMESTAMP
+            ;;
+        T) TIME_COMMAND=$TIMEDELTA
             ;;
         s) USER_SET_STOP_ON_FAILURE=TRUE
             ;;
@@ -270,11 +275,13 @@ function invoke_crash()
     # $1:crash path, $2:junk output log path
     echo "[Test $DUMPLIST_INDEX]" > $2
     echo "[Dumpfile $ARG1 $ARG2]" >> $2
-    echo $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
+    echo $SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         tee -a $2
+
     cat $MERGED_COMMANDS | \
         sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | \
-        $SUDO $TIME_COMMAND $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
+        $SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
+        awk "$TIME_COMMAND" | \
         tee -a $2
     # We want to log and return crash exit code
     EXIT_VAL=${PIPESTATUS[2]}
