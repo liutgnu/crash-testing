@@ -21,7 +21,7 @@ TIMEDELTA='BEGIN{t=systime()}{s=systime();printf("% 3d %s\n",s-t,$0);t=s;fflush(
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
-DUMPCORE_TOP_DIR=""
+DUMPCORE_TOP_DIR=$CURRENT_DIR
 COMMANDLIST_FILE=""
 COMMAND_FILE=""
 COMMANDS_TOP_DIR=$CURRENT_DIR
@@ -39,13 +39,13 @@ function print_useage()
     echo "Useage: $FILE_NAME [OPTS]..."
     echo
     echo "-f [FILE]    Specify crash, default is \"$(which crash)\" if crash installed"
-    echo "-D [DIR]     Specify top dir of vmcore(must)"
+    echo "-D [DIR]     Specify top dir of vmcore"
     echo "-d [FILE]    Specify dumpcore list file(must)"
     echo "-C [DIR]     Specify top dir of commands, default to current dir"
     echo "-c [FILE]    Specify crash commands list file"
     echo "-b [FILE]    Specify crash commands file"
     echo "                  One of -c and -b is a (must)"
-    echo "-a           (Not inplemented)Alive test"
+    echo "-a           Live test"
     echo "-l           (Not inplemented)Local test"
     echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
     echo "-t           Print timestamp"
@@ -72,7 +72,6 @@ while getopts "f:d:D:C:c:b:alvtTsme:o:" OPT; do
         b) COMMAND_FILE="$OPTARG"
             ;;
         a) DO_LIVE=TRUE
-            SUDO="sudo"
 	        ;;
         l) DO_LOCAL=TRUE
 	        ;;
@@ -95,16 +94,21 @@ while getopts "f:d:D:C:c:b:alvtTsme:o:" OPT; do
     esac
 done
 
+function delete_tmp_files()
+{
+    rm -f $CRASH_JUNK_OUTPUT \
+        $CRASH2_JUNK_OUTPUT \
+        $MERGED_COMMANDS
+}
+export -f delete_tmp_files
+
 trap "echo 'The program is terminated by user.' && exit 0" SIGTERM SIGINT
+trap "delete_tmp_files" EXIT
 
 ###############Start check inputs####################
-if [[ $DUMPCORE_TOP_DIR == "" ]]; then
-    print_useage && exit 1
-fi
-
 if [[ $DUMPLIST_FILE == "" || ! -f $DUMPLIST_FILE ]]; then
     echo "Error dumpfile list not exist!" 1>&2
-    exit 1
+    print_useage && exit 1
 fi
 DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
 
@@ -205,6 +209,10 @@ for TOOL in ${DIFF_TOOLS[@]}; do
 done
 ###############End check difftools####################
 
+rm -f $CRASH_PERSISTENT_OUTPUT \
+    $CRASH2_PERSISTENT_OUTPUT
+delete_tmp_files
+
 ###############Start merge commands###################
 function output_each_command_file()
 {
@@ -274,7 +282,13 @@ function invoke_crash()
 {
     # $1:crash path, $2:junk output log path
     echo "[Test $DUMPLIST_INDEX]" > $2
-    echo "[Dumpfile $ARG1 $ARG2]" >> $2
+    if [ $ARG1 == "live" ]; then
+        echo "[Dumpfile $ARG1]" >> $2
+        SUDO="sudo"
+        ARG1=""
+    else
+        echo "[Dumpfile $ARG1 $ARG2]" >> $2
+    fi
     echo $SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         tee -a $2
 
@@ -297,8 +311,6 @@ function check_should_stop()
     fi
 }
 
-rm -f $CRASH_PERSISTENT_OUTPUT \
-    $CRASH2_PERSISTENT_OUTPUT
 cd $DUMPCORE_TOP_DIR
 ###############End loop preparation###################
 
@@ -326,13 +338,17 @@ do
         continue
     fi
 
-    if [[ $ARG1 == "LIVE" ]]; then
-        SUDO="sudo"
-        continue
+    echo "[Test $DUMPLIST_INDEX]"
+    if [[ $ARG1 == "live" ]]; then
+        echo "[Dumpfile $ARG1]"
+        if [[ $DO_LIVE == FALSE ]]; then
+            echo "WARNING: Skip live test, maybe (-a) not on?"
+            continue
+        fi
+    else
+        echo "[Dumpfile $ARG1 $ARG2]" 
     fi
 
-    echo "[Test $DUMPLIST_INDEX]"
-    echo "[Dumpfile $ARG1 $ARG2]"
     if [[ $CRASH2 == "" ]]; then
         invoke_crash $CRASH $CRASH_JUNK_OUTPUT
         EXIT_VAL=$?

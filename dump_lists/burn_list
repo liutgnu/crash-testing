@@ -58,8 +58,8 @@ KASLR_3.10.0-663.el7_trace-cmd/vmcore KASLR_3.10.0-663.el7_trace-cmd/vmlinux.gz
 3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmcore 3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmlinux-3.10.0-274.el7.gz
 ORC/vmcore ORC/vmlinux.gz
 PEGAS_4.11.0-1.el7_trace-cmd/vmcore PEGAS_4.11.0-1.el7_trace-cmd/vmlinux.gz
-QEMU_ramdumps/vmlinux.gz QEMU_ramdumps/MEM@0
-QEMU_ramdumps/vmlinux.gz QEMU_ramdumps/MEM_AFTER_CRASH@0
+QEMU_ramdumps/vmlinux.gz QEMU_ramdumps/MEM
+QEMU_ramdumps/vmlinux.gz QEMU_ramdumps/MEM_AFTER_CRASH
 OVMF_compressed/vmcore.ovmf.rhel7.kdump-lzo OVMF_compressed/vmlinux-3.10.0-123.el7.gz
 OVMF_compressed/vmcore.ovmf.rhel7.kdump-snappy OVMF_compressed/vmlinux-3.10.0-123.el7.gz
 OVMF_compressed/vmcore.ovmf.rhel7.kdump-zlib OVMF_compressed/vmlinux-3.10.0-123.el7.gz
