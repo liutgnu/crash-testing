@@ -4,20 +4,27 @@ CURRENT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd -P)
 FILE_NAME=$(basename ${BASH_SOURCE[0]})
 THIS_FILE=$CURRENT_DIR/$FILE_NAME
 
-# Persistent output for recording the all output log of CRASH.
-# Junk output for recording the specific output of 
-# a specific combination of CRASH command list and vmcore dump.  
-CRASH_PERSISTENT_OUTPUT="/tmp/crash.log"
-CRASH_JUNK_OUTPUT="/tmp/.crash_junk.log"
-CRASH2_PERSISTENT_OUTPUT="/tmp/crash2.log"
-CRASH2_JUNK_OUTPUT="/tmp/.crash2_junk.log"
-MERGED_COMMANDS="/tmp/.merged_commands.log"
-DUMPLIST_INDEX=0
+# Instance output for recording the all output log of CRASH pid instance.
+# Junk output for recording the output of CRASH pid instance of
+# a specific combination of command list and vmcore dump.
+# Final output is report for users.
+CRASH_INSTANCE_OUTPUT="/tmp/.crash.log.$$"
+CRASH_FINAL_OUTPUT="/tmp/crash.log"
+CRASH_INSTANCE_JUNK_OUTPUT="/tmp/.crash_junk.log.$$"
+CRASH2_INSTANCE_OUTPUT="/tmp/.crash2.log.$$"
+CRASH2_FINAL_OUTPUT="/tmp/crash2.log"
+CRASH2_INSTANCE_JUNK_OUTPUT="/tmp/.crash2_junk.log.$$"
+MERGED_COMMANDS="/tmp/.merged_commands.log.$$"
 COMMANDLIST_INDEX=0
 VERBOSE_MODE=FALSE
 DIFF_TOOL=""
 TIMESTAMP='{print strftime("%F %T"),$0;fflush()}'
 TIMEDELTA='BEGIN{t=systime()}{s=systime();printf("% 3d %s\n",s-t,$0);t=s;fflush()}'
+ALL_ARGS="$@"
+SPLIT_OUTPUT_PREFIX="/tmp/.crash_dumplist_split."
+if [[ $DUMPLIST_INDEX == "" ]]; then
+    DUMPLIST_INDEX=0
+fi
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
@@ -33,6 +40,7 @@ CRASH2=""
 SUDO=""
 OPTARGS="-s "
 USER_SET_STOP_ON_FAILURE=FALSE
+CONCURRENCY=""
 
 function print_useage()
 {
@@ -52,12 +60,12 @@ function print_useage()
     echo "-T           Print timedelta"
     echo "-s           Stop on failure"
     echo "-m           More verbose log output"
+    echo "-u [NUM]     Run in NUM concurrency"
     echo "-e [FILE]    Specify extra crash for behaviour comparison"
     echo "-o [OPTS]    Specify options for crash (and for extra crash as well if -e exist)"
 }
-export -f print_useage
 
-while getopts "f:d:D:C:c:b:alvtTsme:o:" OPT; do
+while getopts "f:d:D:C:c:b:alvtTsmu:e:o:" OPT; do
     case $OPT in
         f) CRASH="$OPTARG"
             ;;
@@ -85,6 +93,8 @@ while getopts "f:d:D:C:c:b:alvtTsme:o:" OPT; do
             ;;
         m) VERBOSE_MODE=TRUE
             ;;
+        u) CONCURRENCY=$OPTARG
+            ;;
         e) CRASH2="$OPTARG"
             ;;
         o) OPTARGS="$OPTARGS""$OPTARG"
@@ -96,13 +106,25 @@ done
 
 function delete_tmp_files()
 {
-    rm -f $CRASH_JUNK_OUTPUT \
-        $CRASH2_JUNK_OUTPUT \
+    rm -f $CRASH_INSTANCE_JUNK_OUTPUT \
+        $CRASH2_INSTANCE_JUNK_OUTPUT \
         $MERGED_COMMANDS
+    if [[ ! $CONCURRENCY == "" ]]; then
+        rm -f $SPLIT_OUTPUT_PREFIX*
+        rm -f `echo $CRASH_INSTANCE_OUTPUT | \
+            sed -E "s/.[0-9]+$/.*/"`
+        rm -f `echo $CRASH2_INSTANCE_OUTPUT | \
+            sed -E "s/.[0-9]+$/.*/"`        
+    fi
 }
-export -f delete_tmp_files
 
-trap "echo 'The program is terminated by user.' && exit 0" SIGTERM SIGINT
+# The script will generate subprocesses, so terminate them when we
+# receive signals.
+trap '
+    echo "The program is terminated by user.";
+    trap - SIGTERM SIGINT && kill -- -$$ 2>/dev/null;
+    unset CONCURRENT_SUBPROCESS;
+    exit 0' SIGTERM SIGINT
 trap "delete_tmp_files" EXIT
 
 ###############Start check inputs####################
@@ -140,6 +162,13 @@ if [[ ! $CRASH2 == "" && ! -x $CRASH2 ]]; then
     exit 1
 fi
 
+# CONCURRENCY should be 1,2,3...
+CONCURRENCY_REGX='^[1-9][0-9]*$'
+if [[ ! $CONCURRENCY == "" && ! $CONCURRENCY =~ $CONCURRENCY_REGX ]]; then
+    echo "Error: $CONCURRENCY is not valid concurrency!" 1>&2
+    exit 1
+fi
+
 echo "We are using crash path $CRASH..."
 if [[ ! $CRASH2 == "" ]]; then
     echo "We are using crash2 path $CRASH2..."
@@ -151,14 +180,16 @@ function check_line_results()
     VAR1="$1"_START_LINE
     VAR2="$1"_END_LINE
     if [[ ${!VAR1} == "1" || ${!VAR2} == "-1" ]]; then
-        echo "Error $(readlink -f $2) file format" 1>&2
-        echo 1>&2
-        echo "Example:" 1>&2
-        echo "$1_START" 1>&2
-        echo "your list1" 1>&2
-        echo "your list2" 1>&2
-        echo "..." 1>&2
-        echo "$1_END" 1>&2
+        {
+            echo "Error $(readlink -f $2) file format"
+            echo
+            echo "Example:"
+            echo "$1_START"
+            echo "your list1"
+            echo "your list2"
+            echo "..."
+            echo "$1_END"
+        } 1>&2
         exit 1
     fi
 }
@@ -175,30 +206,6 @@ function get_linenum_in_file()
 export -f get_linenum_in_file
 ###############Done check inputs######################
 
-###############Start check crashrc####################
-function check_crashrc()
-{
-    # $1: The folder of crashrc
-    if [ -f $1/.crashrc ]; then
-        if [ $1 == "$HOME" ]; then
-            echo "WARNING: $1/.crashrc:" 1>&2
-        else
-            echo "WARNING: ./crashrc:" 1>&2
-        fi
-        cat $1/.crashrc 1>&2
-        echo 1>&2
-        echo -n "enter <RETURN> to continue: " 1>&2
-        read INPUT
-    fi
-}
-export -f check_crashrc
-
-CRASHRC_FOLDERS=("$HOME" "$CURRENT_DIR")
-for FOLDER in ${CRASHRC_FOLDERS[@]}; do
-    check_crashrc $FOLDER
-done
-###############End check crashrc######################
-
 ###############Start check difftools##################
 DIFF_TOOLS=("tkdiff" "kdiff3" "meld" "kompare" "colordiff" "wdiff" "diff")
 for TOOL in ${DIFF_TOOLS[@]}; do
@@ -207,10 +214,161 @@ for TOOL in ${DIFF_TOOLS[@]}; do
         break;
     fi
 done
+
+function output_final_and_popup_show_diff()
+{
+    if [[ -f $CRASH_INSTANCE_OUTPUT ]]; then
+        mv $CRASH_INSTANCE_OUTPUT $CRASH_FINAL_OUTPUT
+    fi
+    if [[ ! $CRASH2 == "" && -f $CRASH2_INSTANCE_OUTPUT ]]; then
+        mv $CRASH2_INSTANCE_OUTPUT $CRASH2_FINAL_OUTPUT
+        if [ ! $DIFF_TOOL == "" ]; then
+            echo "Now invoke $DIFF_TOOL to present diff..."
+            $DIFF_TOOL $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT
+        else
+            echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\"" 1>&2
+        fi
+    fi
+}
+
+function print_message_and_exit()
+{
+    # $1: exit value
+    if [ $1 -eq 0 ]; then
+        echo "Crash test complete!"
+        exit 0
+    else
+        echo "Crash test error occured, please check logs for details" 1>&2
+        exit 1
+    fi    
+}
 ###############End check difftools####################
 
-rm -f $CRASH_PERSISTENT_OUTPUT \
-    $CRASH2_PERSISTENT_OUTPUT
+###############Start dealing concurrency##############
+function list_process_all_descendants()
+{
+    # $1: The pid of the process to be listed
+    local IMMEDIATE_DESCEND=$(ps -o pid= --ppid "$1")
+    for PID in $IMMEDIATE_DESCEND; do
+        list_process_all_descendants $PID
+    done
+    [[ ! "$IMMEDIATE_DESCEND" == "" ]] && echo "$IMMEDIATE_DESCEND"
+}
+
+function collect_subprocess_log()
+{
+    # $1: Prefix of instance output 
+    # $2: Subprocess pid
+    # $3: Parent process pid
+    CHILD_INSTANCE_OUTPUT="$1"."$2"
+    PARENT_INSTANCE_OUTPUT="$1"."$3"
+    [[ -f $CHILD_INSTANCE_OUTPUT ]] && \
+        cat $CHILD_INSTANCE_OUTPUT >> $PARENT_INSTANCE_OUTPUT
+    rm -f $CHILD_INSTANCE_OUTPUT    
+}
+
+if [ ! $CONCURRENCY == "" ]; then
+    # Here we will remove -u and -d arguments passed to the script.
+    # Remove -u because we want to call the same script without concurrency
+    # later.
+    # Remove -d because we will generate maximun CONCURRENCY quantity of
+    # splitted sub-dumplist files for each subprocess calling. So we will 
+    # recreate -d option later.
+    SUB_ARGS=`
+        echo $ALL_ARGS | \
+        sed -E 's/-u\s+[1-9][0-9]*//' | \
+        sed -E 's/-d\s+\S+//'`
+    declare -a PIDS_ARRAY=( $(for i in {1..$CONCURRENCY}; do echo 0; done) )
+    EXIT_VAL_ARRAY=( ${PIDS_ARRAY[@]} )
+
+    # Eg: If we have 10 items on dumplist, and CONCURRENCY is 3, so SPLIT_ARRAY
+    # will be (4 3 3), and 3 sub-dumplist files are generated:
+    # $SPLIT_OUTPUT_PREFIX.0 (4 items, 1st-4th item of the original dumplist) 
+    # $SPLIT_OUTPUT_PREFIX.1 (3 items, 5th-7th item of the original dumplist)
+    # $SPLIT_OUTPUT_PREFIX.2 (3 items, 8th-10th item of the original dumplist)
+    # Each $SPLIT_OUTPUT_PREFIX.x will be feed to this same script and creating
+    # a subprocess, thus we will have 3 concurrent subprocesses dealing with 
+    # different items of the original dumplist.
+    SPLIT_ARRAY=($($CURRENT_DIR/dumplist_split.sh $DUMPLIST_FILE $CONCURRENCY \
+        $SPLIT_OUTPUT_PREFIX))
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+
+    # Subprocess creating
+    INDEX_ACCUMULATION=0
+    # We use CONCURRENT_SUBPROCESS to identify whether we are in
+    # subprocesses created here.
+    export CONCURRENT_SUBPROCESS=TRUE
+    for ((i=0;i<${#SPLIT_ARRAY[@]};i++)); do
+        echo "Subprocess $i:" $THIS_FILE "$SUB_ARGS -d $SPLIT_OUTPUT_PREFIX$i"
+        export DUMPLIST_INDEX=$INDEX_ACCUMULATION
+        $THIS_FILE $SUB_ARGS -d $SPLIT_OUTPUT_PREFIX$i &
+        PIDS_ARRAY[$i]=$!
+        INDEX_ACCUMULATION=$(($INDEX_ACCUMULATION + ${SPLIT_ARRAY[$i]}))
+    done
+    unset CONCURRENT_SUBPROCESS
+
+    # Subprocess waiting
+    for ((i=0;i<${#SPLIT_ARRAY[@]};i++)); do
+        wait -fn ${PIDS_ARRAY[$i]}
+        EXIT_VAL_ARRAY[$i]=$?
+        # Eg: If user set stop on failure and the 2nd item(which belongs to 
+        # $SPLIT_OUTPUT_PREFIX.0) of original dumplist fails, thus processes
+        # which dealing with $SPLIT_OUTPUT_PREFIX.1/2/3 should be terminated, 
+        # no need to wait for them.
+        if [[ ${EXIT_VAL_ARRAY[$i]} -ne 0 && $USER_SET_STOP_ON_FAILURE == TRUE ]]; then
+            for ((j=$i+1;j<${#SPLIT_ARRAY[@]};j++)); do
+                kill -SIGTERM $(list_process_all_descendants ${PIDS_ARRAY[$j]}) \
+                    2>/dev/null
+            done
+        fi
+    done
+
+    # Collecting logs of subprocesses
+    for ((i=0;i<${#SPLIT_ARRAY[@]};i++)); do
+        collect_subprocess_log $CRASH_FINAL_OUTPUT ${PIDS_ARRAY[$i]} $$
+        if [[ ! $CRASH2 == "" ]]; then
+            collect_subprocess_log $CRASH2_FINAL_OUTPUT ${PIDS_ARRAY[$i]} $$
+        fi
+        if [[ $USER_SET_STOP_ON_FAILURE == TRUE && ${EXIT_VAL_ARRAY[$i]} -ne 0 ]]; then
+            break
+        fi
+    done
+
+    output_final_and_popup_show_diff
+    rm -f $SPLIT_OUTPUT_PREFIX*
+    # If EXIT_VAL_ARRAY contains numbers other than 0, then fails.
+    print_message_and_exit $([[ ${EXIT_VAL_ARRAY[@]} =~ [1-9]+ ]] && echo 1 || echo 0)
+fi
+###############Done dealing concurrency###############
+
+###############Start check crashrc####################
+function check_crashrc()
+{
+    # $1: The folder of crashrc
+    { 
+        if [ -f $1/.crashrc ]; then
+            if [ $1 == "$HOME" ]; then
+                echo "WARNING: $1/.crashrc:"
+            else
+                echo "WARNING: ./crashrc:"
+            fi
+            cat $1/.crashrc
+            echo
+            echo -n "enter <RETURN> to continue: "
+            read INPUT
+        fi 
+    } 1>&2
+}
+
+CRASHRC_FOLDERS=("$HOME" "$CURRENT_DIR")
+for FOLDER in ${CRASHRC_FOLDERS[@]}; do
+    check_crashrc $FOLDER
+done
+###############End check crashrc######################
+rm -f $CRASH_INSTANCE_OUTPUT \
+    $CRASH2_INSTANCE_OUTPUT
 delete_tmp_files
 
 ###############Start merge commands###################
@@ -230,7 +388,6 @@ function output_each_command_file()
         sed '/^\s*\(exit\|q\)\s*$/d' \
         >> $2
 }
-export -f output_each_command_file
 
 rm -f $MERGED_COMMANDS
 echo "COMMAND_START" > $MERGED_COMMANDS
@@ -302,7 +459,6 @@ function invoke_crash()
     echo -e "Crash returnd with $EXIT_VAL\n" | tee -a $2
     return $EXIT_VAL
 }
-export -f invoke_crash
 
 function check_should_stop()
 {
@@ -350,48 +506,48 @@ do
     fi
 
     if [[ $CRASH2 == "" ]]; then
-        invoke_crash $CRASH $CRASH_JUNK_OUTPUT
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT
         EXIT_VAL=$?
         if [ $EXIT_VAL -ne 0 ]; then
             FAILURE_FLAG=TRUE
         fi
         if [[ $VERBOSE_MODE == TRUE || $FAILURE_FLAG == TRUE ]]; then
-            cat $CRASH_JUNK_OUTPUT >> $CRASH_PERSISTENT_OUTPUT
+            cat $CRASH_INSTANCE_JUNK_OUTPUT >> $CRASH_INSTANCE_OUTPUT
         fi
     else
         # Here we compare the outputs of CRASH and CRASH2 are same or not.
         # By put crash and crash2 into background will shorten the overall time.
-        invoke_crash $CRASH $CRASH_JUNK_OUTPUT &
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT &
         PID[0]=$!
-        invoke_crash $CRASH2 $CRASH2_JUNK_OUTPUT &
+        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT &
         PID[1]=$!
         for ((i=0;i<2;i++)); do
-            wait -n ${PID[$i]}
+            wait -fn ${PID[$i]}
             EXIT_VAL[$i]=$?
         done
         # 1st check: the return value diff
         if [ ! "${EXIT_VAL[0]}" == "${EXIT_VAL[1]}" ]; then
             echo "Exit values mismatch, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
-                tee -a $CRASH_JUNK_OUTPUT | \
-                tee -a $CRASH2_JUNK_OUTPUT
+                tee -a $CRASH_INSTANCE_JUNK_OUTPUT | \
+                tee -a $CRASH2_INSTANCE_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
         fi
         # 2nd check: the return value == 0
         if [[ ! ${EXIT_VAL[0]} == 0 || ! ${EXIT_VAL[1]} == 0 ]]; then
             echo "Exit values are not 0, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
-                tee -a $CRASH_JUNK_OUTPUT | \
-                tee -a $CRASH2_JUNK_OUTPUT
+                tee -a $CRASH_INSTANCE_JUNK_OUTPUT | \
+                tee -a $CRASH2_INSTANCE_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
         fi
         # 3rd check: the output junk
-        if [ ! "$(sum $CRASH_JUNK_OUTPUT)" == "$(sum $CRASH2_JUNK_OUTPUT)" ]; then
-            echo "Crash output mismatch, check diff in $CRASH_PERSISTENT_OUTPUT and $CRASH2_PERSISTENT_OUTPUT" 1>&2
+        if [ ! "$(sum $CRASH_INSTANCE_JUNK_OUTPUT)" == "$(sum $CRASH2_INSTANCE_JUNK_OUTPUT)" ]; then
+            echo "Crash output mismatch, check diff in $CRASH_INSTANCE_OUTPUT and $CRASH2_INSTANCE_OUTPUT" 1>&2
             FAILURE_FLAG=TRUE
         fi
         # If we are in debug mode or failure occured, persist the output log
         if [[ $VERBOSE_MODE == TRUE || $FAILURE_FLAG == TRUE ]]; then
-            cat $CRASH_JUNK_OUTPUT >> $CRASH_PERSISTENT_OUTPUT
-            cat $CRASH2_JUNK_OUTPUT >> $CRASH2_PERSISTENT_OUTPUT
+            cat $CRASH_INSTANCE_JUNK_OUTPUT >> $CRASH_INSTANCE_OUTPUT
+            cat $CRASH2_INSTANCE_JUNK_OUTPUT >> $CRASH2_INSTANCE_OUTPUT
         fi
     fi
     
@@ -402,25 +558,11 @@ done
 EXIT_VAL=$?
 ###############The loop end###########################
 
-function popup_show_diff()
-{
-    if [[ ! $CRASH2 == "" && -f $CRASH2_PERSISTENT_OUTPUT ]]; then
-        if [ ! $DIFF_TOOL == "" ]; then
-            echo "Now invoke $DIFF_TOOL to present diff..."
-            $DIFF_TOOL $CRASH_PERSISTENT_OUTPUT $CRASH2_PERSISTENT_OUTPUT
-        else
-            echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\"" 1>&2
-        fi
-    fi
-}
-export -f popup_show_diff
-
 cd ~-
-popup_show_diff
-if [ $EXIT_VAL -eq 0 ]; then
-    echo "Crash test complete!"
-    exit 0
+if [[ $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
+    # We are subprocess, just exit with status.
+    exit $EXIT_VAL
 else
-    echo "Crash test error occured, please check logs for details" 1>&2
-    exit 1
+    output_final_and_popup_show_diff
+    print_message_and_exit $EXIT_VAL
 fi
