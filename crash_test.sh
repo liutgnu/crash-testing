@@ -438,6 +438,8 @@ check_line_results "COMMAND" $MERGED_COMMANDS
 function invoke_crash()
 {
     # $1:crash path, $2:junk output log path
+    source $CURRENT_DIR/template.sh
+    init_template
     echo "[Test $DUMPLIST_INDEX]" > $2
     if [ $ARG1 == "live" ]; then
         echo "[Dumpfile $ARG1]" >> $2
@@ -451,11 +453,13 @@ function invoke_crash()
 
     cat $MERGED_COMMANDS | \
         sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | \
+        run_template | \
         $SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
         awk "$TIME_COMMAND" | \
         tee -a $2
     # We want to log and return crash exit code
-    EXIT_VAL=${PIPESTATUS[2]}
+    EXIT_VAL=${PIPESTATUS[3]}
+    exit_template
     echo -e "Crash returnd with $EXIT_VAL\n" | tee -a $2
     return $EXIT_VAL
 }

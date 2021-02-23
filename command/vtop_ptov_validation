@@ -1,0 +1,17 @@
+# This command file is used to test the function of vtop/ptov.
+# If a address A is vtop then ptov, then get a returned address B,
+# the content of A and B must be the same, otherwise crash meets an
+# internal error.
+
+COMMAND_START
+@ sym vfs_read | awk '{print $1}' > {{virtual_addr1}}
+@ vtop {{virtual_addr1}} | sed -n 2p | awk '{print $2}' > {{physical_addr}}
+@ ptov {{physical_addr}} | sed -n 2p | awk '{print $1}' > {{virtual_addr2}}
+@ rd {{virtual_addr1}} 32 | awk '{print $2,$3}' > {{content1}}
+@ rd {{virtual_addr2}} 32 | awk '{print $2,$3}' > {{content2}}
+@ echo '{{content1}}' > /tmp/content1.txt
+@ echo '{{content2}}' > /tmp/content2.txt
+! cmp /tmp/content1.txt /tmp/content2.txt && echo "Content compare GOOD" || echo "Content compare BAD"
+! rm -f /tmp/content1.txt /tmp/content2.txt
+q
+COMMAND_END
