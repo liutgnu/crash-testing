@@ -89,7 +89,20 @@ function run_template()
             # redirecting the output to the pipe.
             echo "${BASH_REMATCH[1]} > $PIPE"
             # Now we read from pipe, get the value of {{var}}
-            eval "$VR"=\"$(cat $PIPE)\"
+            while true; do
+                sleep 0.2
+                # This echo is used to check pipe's functionality, or the 
+                # status of crash process. If crash has exited due to some
+                # error, when echo here, we will receive SIGPIPE, which will 
+                # terminate the script.
+                echo -e "\n"
+                # Non-block cat the named pipe.
+                local TMP=\"$(cat 0<>$PIPE <$PIPE)\"
+                if [[ ! "$TMP" == "\"\"" ]]; then
+                    eval "$VR"=$TMP
+                    break
+                fi
+            done
         else
             # If no template variable assignment, do nothing.
             echo $LINE
