@@ -7,11 +7,10 @@ COMMAND_START
 @ sym vfs_read | awk '{print $1}' > {{virtual_addr1}}
 @ vtop {{virtual_addr1}} | sed -n 2p | awk '{print $2}' > {{physical_addr}}
 @ ptov {{physical_addr}} | sed -n 2p | awk '{print $1}' > {{virtual_addr2}}
-@ rd {{virtual_addr1}} 32 | awk '{print $2,$3}' > {{content1}}
-@ rd {{virtual_addr2}} 32 | awk '{print $2,$3}' > {{content2}}
-@ echo '{{content1}}' > /tmp/content1.txt
-@ echo '{{content2}}' > /tmp/content2.txt
-! cmp /tmp/content1.txt /tmp/content2.txt && echo "Content compare GOOD" || echo "Content compare BAD"
-! rm -f /tmp/content1.txt /tmp/content2.txt
+@ rd {{virtual_addr1}} 32 | awk '{print $2,$3}' | md5sum | cut -f1 -d" " > {{content1}}
+@ rd {{virtual_addr2}} 32 | awk '{print $2,$3}' | md5sum | cut -f1 -d" " > {{content2}}
+@ echo "content1: {{content1}}"
+@ echo "content2: {{content2}}"
+@ ! [[ "{{content1}}"=="{{content2}}" ]] && echo "Content compare GOOD" || echo "Content compare BAD"
 q
 COMMAND_END

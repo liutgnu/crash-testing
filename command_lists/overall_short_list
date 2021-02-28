@@ -31,4 +31,5 @@ command/task
 command/timer
 command/vm
 command/whatis
+command/vtop_ptov_validation
 COMMANDLIST_END
