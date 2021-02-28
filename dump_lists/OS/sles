@@ -1,0 +1,5 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/SLES9/ap17.1234028168.dmp burn.khw2.lab.eng.bos.redhat.com/SLES9/System.map-2.6.5-7.315-smp  burn.khw2.lab.eng.bos.redhat.com/SLES9/vmlinux-2.6.5-7.315-smp.debug.gz
+crash.usersys.redhat.com/SLES9-2.6.5-7.308-smp/dump.1 crash.usersys.redhat.com/SLES9-2.6.5-7.308-smp/vmlinux
+crash.usersys.redhat.com/3.0.80-0.7.1.SLES11SP2.NEO_notify_die/kdump_FNM00124900451_2013-10-30_09_21_53 crash.usersys.redhat.com/3.0.80-0.7.1.SLES11SP2.NEO_notify_die/vmlinux-3.0.80-0.7.1.SLES11SP2.NEO.gz
+DUMPLIST_END

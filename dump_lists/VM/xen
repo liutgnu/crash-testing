@@ -1,0 +1,28 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5xen_virsh_dump/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5xen_virsh_dump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-345.el5xen_dom0/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-345.el5xen_dom0/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-345.el5xen_dom0/xen-syms-2.6.18-345.el5 burn.khw2.lab.eng.bos.redhat.com/2.6.18-345.el5xen_dom0/xen-syms-2.6.18-345.el5.debug  burn.khw2.lab.eng.bos.redhat.com/2.6.18-345.el5xen_dom0/vmcore
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-36.el5xen/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-36.el5xen/vmlinux-2.6.18-36.el5xen.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-58.el5xen/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-58.el5xen/vmlinux-2.6.18-58.el5.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.9-89.ELxenU_8GB/427733-squawvalley-coredump burn.khw2.lab.eng.bos.redhat.com/2.6.9-89.ELxenU_8GB/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmcore-rawhide.xmdump burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmcore-rawhide.xmdump burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmlinux.gz  --machdep phys_base=ffffffffff200000
+burn.khw2.lab.eng.bos.redhat.com/waste/2.6.27-0.244.rc2.git1.fc10_xen_FV/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/waste/2.6.27-0.244.rc2.git1.fc10_xen_FV/2008-0813-0939.11-rawhide.17.core
+burn.khw2.lab.eng.bos.redhat.com/waste/kraxel.8xen/vmcore-kraxel8-xen-x86_64 burn.khw2.lab.eng.bos.redhat.com/waste/kraxel.8xen/vmlinux-2.6.18-26.el5.kraxel.8xen.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/magnus_2/vmcore-12733-x86_64-kexec-tools-testing-b5c22baac1a632363a91da666886bb0ae285bd67 burn.khw2.lab.eng.bos.redhat.com/waste/magnus_2/xen-syms
+burn.khw2.lab.eng.bos.redhat.com/waste/rhel5_dom0_kdump/vmcore burn.khw2.lab.eng.bos.redhat.com/waste/rhel5_dom0_kdump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/xen-2.6.16/dump burn.khw2.lab.eng.bos.redhat.com/waste/xen-2.6.16/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/xen_5.1_OK/vmcore-5.1 burn.khw2.lab.eng.bos.redhat.com/waste/xen_5.1_OK/vmlinux-2.6.18-53.el5xen-x86_64.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/xen_5.2_dom0_hv/vmlinux-2.6.18-89.el5xen.x86_64.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen_5.2_dom0_hv/xen-5.2-x86_64-vmcore
+burn.khw2.lab.eng.bos.redhat.com/waste/xen_5.2_dom0_hv/xen-syms-2.6.18-89.el5 burn.khw2.lab.eng.bos.redhat.com/waste/xen_5.2_dom0_hv/xen-5.2-x86_64-vmcore  --xen_phys_start 0x3f000000
+burn.khw2.lab.eng.bos.redhat.com/waste/xen-ELF/2007-0315-1707.19-rhel5.6.core burn.khw2.lab.eng.bos.redhat.com/waste/xen-ELF/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/xen-rhel4/2006-1005-1015.20-rhel4-file.1.core burn.khw2.lab.eng.bos.redhat.com/waste/xen-rhel4/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/xen-rhel5/vmlinux-2.6.18-1.2714.el5xen.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen-rhel5/Live_Dump
+burn.khw2.lab.eng.bos.redhat.com/waste/xen-rhel5/vmlinux-2.6.18-1.2714.el5xen.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen-rhel5/xguest-crashdump
+burn.khw2.lab.eng.bos.redhat.com/waste/xen/vmlinux.dla2xenU.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen/dump1
+burn.khw2.lab.eng.bos.redhat.com/waste/xen/vmlinux.dla2xenU.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen/guest1.3.core
+burn.khw2.lab.eng.bos.redhat.com/waste/xen/vmlinux.dla2xenU.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen/guest1.5.core
+burn.khw2.lab.eng.bos.redhat.com/waste/xen/vmlinux.dla2xenU.gz burn.khw2.lab.eng.bos.redhat.com/waste/xen/guest1.save1
+crash.usersys.redhat.com/RHEL6_xen_pvops/vmlinux.gz crash.usersys.redhat.com/RHEL6_xen_pvops/2010-0628-1314.28-rhel6-64pv.8.core_virsh_dump
+crash.usersys.redhat.com/RHEL6_xen_pvops/vmlinux-xenpanic_v2.gz crash.usersys.redhat.com/RHEL6_xen_pvops/2010-0716-1609.25-rhel6-64.26.core_pv
+DUMPLIST_END

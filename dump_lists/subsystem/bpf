@@ -1,0 +1,6 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-0.rc8.1.el8+7_BPF/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-0.rc8.1.el8+7_BPF/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-915.el7_BPF_test/vmcore.0 burn.khw2.lab.eng.bos.redhat.com/3.10.0-915.el7_BPF_test/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-915.el7_BPF_test/vmcore.1 burn.khw2.lab.eng.bos.redhat.com/3.10.0-915.el7_BPF_test/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-915.el7_BPF_test/vmcore.2 burn.khw2.lab.eng.bos.redhat.com/3.10.0-915.el7_BPF_test/vmlinux.gz
+DUMPLIST_END

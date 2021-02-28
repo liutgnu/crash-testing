@@ -1,0 +1,4 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5_HVM_virsh_dump/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5_HVM_virsh_dump/vmlinux.gz
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-71.el6-vgettimeofday/rhel6_x86_64_hvm.img crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-71.el6-vgettimeofday/vmlinux.gz
+DUMPLIST_END

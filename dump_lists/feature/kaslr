@@ -1,0 +1,12 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/KASLR_4.9.0-rc2_dyoung/vmcore burn.khw2.lab.eng.bos.redhat.com/KASLR_4.9.0-rc2_dyoung/vmlinux.kaslr
+burn.khw2.lab.eng.bos.redhat.com/KASLR_4.9.0-rc2_dyoung/vmcore.makedumpfile burn.khw2.lab.eng.bos.redhat.com/KASLR_4.9.0-rc2_dyoung/vmlinux.kaslr
+burn.khw2.lab.eng.bos.redhat.com/KASLR_rhel7_bz1424943/vmcore-3.10.0-576.el7.bz1424943 burn.khw2.lab.eng.bos.redhat.com/KASLR_rhel7_bz1424943/vmlinux-3.10.0-576.el7.bz1424943.gz
+burn.khw2.lab.eng.bos.redhat.com/KASLR_3.10.0-656.el7.x86_64/vmcore burn.khw2.lab.eng.bos.redhat.com/KASLR_3.10.0-656.el7.x86_64/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/KASLR_4.10.11-200.fc25/vmcore burn.khw2.lab.eng.bos.redhat.com/KASLR_4.10.11-200.fc25/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/KASLR_3.10.0-663.el7_trace-cmd/vmcore burn.khw2.lab.eng.bos.redhat.com/KASLR_3.10.0-663.el7_trace-cmd/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/slp-rhel75-1vcpu.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/slp-rhel75-8vcpus.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/01895171-tc01-Snapshot1.vmsn burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/vmlinux.gz
+crash.usersys.redhat.com/3.14.0-rc1+_KASLR/vmcore crash.usersys.redhat.com/3.14.0-rc1+_KASLR/vmlinux.gz  --kaslr=auto
+DUMPLIST_END

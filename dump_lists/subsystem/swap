@@ -1,0 +1,4 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-0.rc8.2.el8+7_SWAP/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-0.rc8.2.el8+7_SWAP/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-935.el7_SWAP_L1TF/vmcore_3.10.0-935.el7.x86_64 burn.khw2.lab.eng.bos.redhat.com/3.10.0-935.el7_SWAP_L1TF/vmlinux.gz
+DUMPLIST_END

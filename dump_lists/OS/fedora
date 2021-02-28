@@ -1,0 +1,29 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/4.0.4-201.fc21_sysrq-c/vmcore burn.khw2.lab.eng.bos.redhat.com/4.0.4-201.fc21_sysrq-c/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/RANDOMIZE_BASE_4.7.7-200.fc24/vmcore-4.7.7-200.fc24 burn.khw2.lab.eng.bos.redhat.com/RANDOMIZE_BASE_4.7.7-200.fc24/vmlinux-4.7.7-200.fc24
+burn.khw2.lab.eng.bos.redhat.com/snapshot-4.19.0-0.rc1.git0.1.fc30/vmcore_4.19.0-0.rc1.git0.1.fc30 burn.khw2.lab.eng.bos.redhat.com/snapshot-4.19.0-0.rc1.git0.1.fc30/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/KASLR_4.10.11-200.fc25/vmcore burn.khw2.lab.eng.bos.redhat.com/KASLR_4.10.11-200.fc25/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.31-0.122.rc5.git2.fc12/vmcore-2.6.31-0.122.rc5.git2.fc12 burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.31-0.122.rc5.git2.fc12/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.29.4-167.fc11/snapshot burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.29.4-167.fc11/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.29.2-52.fc10/snapshotk burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.29.2-52.fc10/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-3.1.7-1.fc16/vmcore burn.khw2.lab.eng.bos.redhat.com/snapshot-3.1.7-1.fc16/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-3.2.6-3.fc16/vmcore-snapshot-3.2.6-3.fc16 burn.khw2.lab.eng.bos.redhat.com/snapshot-3.2.6-3.fc16/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-3.3.1-3.fc16/vmcore burn.khw2.lab.eng.bos.redhat.com/snapshot-3.3.1-3.fc16/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.34-11.fc14/snapshot burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.34-11.fc14/vmlinux-2.6.34-11.fc14.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmcore-rawhide.xmdump burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/2.6.27-0.244.rc2.git1.fc10_xen_FV/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/waste/2.6.27-0.244.rc2.git1.fc10_xen_FV/2008-0813-0939.11-rawhide.17.core
+burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmcore-rawhide.xmdump burn.khw2.lab.eng.bos.redhat.com/waste/2.6.24-0.62.rc3.git5.fc9-FV-xendump/vmlinux.gz  --machdep phys_base=ffffffffff200000
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.31.5-127.fc12/core.dump crash.usersys.redhat.com/KVM-virsh-dump-2.6.31.5-127.fc12/vmlinux_f12.gz
+crash.usersys.redhat.com/2.6.36-0.16.rc3.git0.fc15_GPF/vmcore.2.6.36-0.16.rc3.git0.fc15.x86_64 crash.usersys.redhat.com/2.6.36-0.16.rc3.git0.fc15_GPF/vmlinux-2.6.36-0.16.rc3.git0.fc15.x86_64.gz
+crash.usersys.redhat.com/snapshot-2.6.38.2-9.fc15_gcc_4.6.0/vmcore.compressed crash.usersys.redhat.com/snapshot-2.6.38.2-9.fc15_gcc_4.6.0/vmlinux-2.6.38.2-9.fc15.gz
+crash.usersys.redhat.com/snapshot-2.6.40.4-5.fc15/vmcore crash.usersys.redhat.com/snapshot-2.6.40.4-5.fc15/vmlinux.gz
+crash.usersys.redhat.com/snapshot-3.5.1-1.fc17/vmcore crash.usersys.redhat.com/snapshot-3.5.1-1.fc17/vmlinux.gz
+crash.usersys.redhat.com/snapshot-3.6.0-0.rc1.git6.1.fc18_SLUB/vmcore-3.6.0-0.rc1.git6.1.fc18_SLUB_2G crash.usersys.redhat.com/snapshot-3.6.0-0.rc1.git6.1.fc18_SLUB/vmlinux--3.6.0-0.rc1.git6.1.fc18_SLUB.gz
+crash.usersys.redhat.com/snapshot-3.11.0-0.rc6.git1.2.fc19_SLAB/vmcore.c_SLAB crash.usersys.redhat.com/snapshot-3.11.0-0.rc6.git1.2.fc19_SLAB/vmlinux.gz
+crash.usersys.redhat.com/3.10.9-200.fc19_resume_stkoverflow/vmcore crash.usersys.redhat.com/3.10.9-200.fc19_resume_stkoverflow/vmlinux-3.10.9-200.fc19.gz
+crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmlinux.gz crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmcore_c_d31
+crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmlinux.gz crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmcore_E_d31
+crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmlinux.slab.gz crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmcore.slab
+crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmlinux.slub.gz crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmcore.slub
+crash.usersys.redhat.com/snapshot-4.2.0-0.rc8.git0.1.fc24/vmlinux.gz crash.usersys.redhat.com/snapshot-4.2.0-0.rc8.git0.1.fc24/vmcore
+DUMPLIST_END

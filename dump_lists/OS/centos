@@ -1,0 +1,4 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss/CentOS6.5-11bd56db.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss/vmlinux-2.6.32-431.el6.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmsn/CentOS6.5-Snapshot2.vmsn burn.khw2.lab.eng.bos.redhat.com/VMware_vmsn/vmlinux-2.6.32-431.29.2.el6.gz
+DUMPLIST_END

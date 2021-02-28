@@ -1,0 +1,12 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss/CentOS6.5-11bd56db.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss/vmlinux-2.6.32-431.el6.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_vmem/Ubuntu1404_64bit-65993542.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_vmem/vmlinux-3.13.0-39-generic.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmsn/CentOS6.5-Snapshot2.vmsn burn.khw2.lab.eng.bos.redhat.com/VMware_vmsn/vmlinux-2.6.32-431.29.2.el6.gz
+DO_NOT_STOP_ON_FAILURE
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/slp-rhel75-1vcpu.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/vmlinux.gz
+DO_NOT_STOP_ON_FAILURE
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/slp-rhel75-8vcpus.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/01895171-tc01-Snapshot1.vmsn burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7_KASLR/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7/slp-rhel75-2-7197c166.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_3.10.0-830.el7/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss2core/01360311-case-01360311-jpwl115_vmss.core burn.khw2.lab.eng.bos.redhat.com/VMware_vmss2core/vmlinux-2.6.18-274.el5.gz  --machdep phys_base=0x200000
+DUMPLIST_END

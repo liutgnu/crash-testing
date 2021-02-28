@@ -1,0 +1,30 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/2.6.31-38.el6_NUMA/snapshot3 burn.khw2.lab.eng.bos.redhat.com/2.6.31-38.el6_NUMA/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-504.16.2.el6.x86_64_GPF_stackoverflow_1228256/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-504.16.2.el6.x86_64_GPF_stackoverflow_1228256/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-746.el6_KPTI_bz1567738/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-746.el6_KPTI_bz1567738/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_SLUB_corruption_1115161/bz1115161-vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_SLUB_corruption_1115161/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmcore.1 burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmlinux-229.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmcore.2 burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmlinux-229.20.1.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmcore.3 burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmlinux-229.20.1.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmlinux-3.10.0-274.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-657.el7_negative_phys_base/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/3.10.0-657.el7_negative_phys_base/vmcore.1
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-657.el7_negative_phys_base/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/3.10.0-657.el7_negative_phys_base/vmcore.2
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-657.el7_negative_phys_base/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/3.10.0-657.el7_negative_phys_base/vmcore.3
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-20.el8_5level_IS_VMALLOC_bz1637125/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-20.el8_5level_IS_VMALLOC_bz1637125/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmcore_J2973424 burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmcore_J2999302 burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-3.el8_page_fault_on_IRQ_stack/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-3.el8_page_fault_on_IRQ_stack/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-44.el8_with_user_pages/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-44.el8_with_user_pages/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.37-slab/vmcore.slab burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.37-slab/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.37-slub/vmcore-slub burn.khw2.lab.eng.bos.redhat.com/snapshot-2.6.37-slub/vmlinux-slub.gz
+crash.usersys.redhat.com/2.6.32-220.el6.x86_64_slab_page_corruption/musa_vmcore crash.usersys.redhat.com/2.6.32-220.el6.x86_64_slab_page_corruption/vmlinux.gz
+crash.usersys.redhat.com/2.6.36-0.16.rc3.git0.fc15_GPF/vmcore.2.6.36-0.16.rc3.git0.fc15.x86_64 crash.usersys.redhat.com/2.6.36-0.16.rc3.git0.fc15_GPF/vmlinux-2.6.36-0.16.rc3.git0.fc15.x86_64.gz
+crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmlinux.gz crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmcore_c_d31
+crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmlinux.gz crash.usersys.redhat.com/3.13.0-0.rc1.git2.1.fc20_SLAB/vmcore_E_d31
+crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmlinux.slab.gz crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmcore.slab
+crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmlinux.slub.gz crash.usersys.redhat.com/3.18.0-0.rc2.git2.1.fc21_SLAB_SLUB/vmcore.slub
+crash.usersys.redhat.com/snapshot-2.6.38-rc4-slub/vmlinux.gz crash.usersys.redhat.com/snapshot-2.6.38-rc4-slub/vmcore
+crash.usersys.redhat.com/snapshot-3.11.0-0.rc6.git1.2.fc19_SLAB/vmcore.c_SLAB crash.usersys.redhat.com/snapshot-3.11.0-0.rc6.git1.2.fc19_SLAB/vmlinux.gz
+crash.usersys.redhat.com/snapshot-3.6.0-0.rc1.git6.1.fc18_SLUB/vmcore-3.6.0-0.rc1.git6.1.fc18_SLUB_2G crash.usersys.redhat.com/snapshot-3.6.0-0.rc1.git6.1.fc18_SLUB/vmlinux--3.6.0-0.rc1.git6.1.fc18_SLUB.gz
+waste.usersys.redhat.com/3.10.0-693.17.1.el7_vmap_area_NULL_link/vmcore waste.usersys.redhat.com/3.10.0-693.17.1.el7_vmap_area_NULL_link/vmlinux.gz
+DUMPLIST_END

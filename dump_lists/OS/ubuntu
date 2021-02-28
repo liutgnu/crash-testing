@@ -1,0 +1,4 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_vmem/Ubuntu1404_64bit-65993542.vmss burn.khw2.lab.eng.bos.redhat.com/VMware_vmss_vmem/vmlinux-3.13.0-39-generic.gz
+burn.khw2.lab.eng.bos.redhat.com/QEMU.ubuntu/mrelay5.virsh.dump burn.khw2.lab.eng.bos.redhat.com/QEMU.ubuntu/vmlinux-2.6.31-17-server.gz
+DUMPLIST_END

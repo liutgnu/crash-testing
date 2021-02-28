@@ -1,0 +1,44 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-202.el6_oomkill_741207/vmlinux-2.6.32-202.el6.x86_64.gz burn.khw2.lab.eng.bos.redhat.com/2.6.32-202.el6_oomkill_741207/vmcore_ibm75418_RH741207
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-358.11.1.el6_hung_tasks_1128520/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-358.11.1.el6_hung_tasks_1128520/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-431.el6_NULL_to_spin_lock_from_unlink_anon_vmas_1165937/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-431.el6_NULL_to_spin_lock_from_unlink_anon_vmas_1165937/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-504.16.2.el6.x86_64_GPF_stackoverflow_1228256/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-504.16.2.el6.x86_64_GPF_stackoverflow_1228256/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-570.el6.debug_scheduling_while_atomic_1235166/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-570.el6.debug_scheduling_while_atomic_1235166/vmlinux-2.6.32-570.el6.x86_64.debug.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-627.el6_kernel_panic_on_lpfc_FC_server_1318930/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-627.el6_kernel_panic_on_lpfc_FC_server_1318930/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-746.el6_KPTI_bz1567738/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.32-746.el6_KPTI_bz1567738/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_SLUB_corruption_1115161/bz1115161-vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_SLUB_corruption_1115161/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_vmci_transport_sk_free_bug_1253971/vmcore.489731259 burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_vmci_transport_sk_free_bug_1253971/vmlinux-3.10.0-123.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_vmci_transport_sk_free_bug_1253971/vmcore.675327374 burn.khw2.lab.eng.bos.redhat.com/3.10.0-123.el7_vmci_transport_sk_free_bug_1253971/vmlinux-3.10.0-123.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmcore.1 burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmlinux-229.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmcore.2 burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmlinux-229.20.1.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmcore.3 burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vmlinux-229.20.1.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmlinux-3.10.0-274.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-327.el7.x86_64_vhost_1350457/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-327.el7.x86_64_vhost_1350457/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-382.el7_CRED_put_cred_rcu_1329488/vmcore.1 burn.khw2.lab.eng.bos.redhat.com/3.10.0-382.el7_CRED_put_cred_rcu_1329488/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-382.el7_CRED_put_cred_rcu_1329488/vmcore.2 burn.khw2.lab.eng.bos.redhat.com/3.10.0-382.el7_CRED_put_cred_rcu_1329488/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-382.el7_CRED_put_cred_rcu_1329488/vmcore.3 burn.khw2.lab.eng.bos.redhat.com/3.10.0-382.el7_CRED_put_cred_rcu_1329488/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-493.el7_module_syms_out_of_order_1375130/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-493.el7_module_syms_out_of_order_1375130/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-823.el7_irq_stack_transition_1530887/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-823.el7_irq_stack_transition_1530887/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-829.el7_kaiser_exception_stack_transition_1534308/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-829.el7_kaiser_exception_stack_transition_1534308/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/3.10.0-830.el7.x86_64_use_gdb_to_kill_init_1536332/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-830.el7.x86_64_use_gdb_to_kill_init_1536332/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.14.0-49.el7a_python_crypto_bz1600394/vmcore burn.khw2.lab.eng.bos.redhat.com/4.14.0-49.el7a_python_crypto_bz1600394/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.16.0-8.el8+5_bz1576374/vmcore2 burn.khw2.lab.eng.bos.redhat.com/4.16.0-8.el8+5_bz1576374/vmlinux2.gz
+burn.khw2.lab.eng.bos.redhat.com/4.16.0-8.el8+5_bz1576374/vmcore burn.khw2.lab.eng.bos.redhat.com/4.16.0-8.el8+5_bz1576374/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.17.0-1.el8+7_gcore_bz1589019/vmcore burn.khw2.lab.eng.bos.redhat.com/4.17.0-1.el8+7_gcore_bz1589019/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-20.el8_5level_IS_VMALLOC_bz1637125/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-20.el8_5level_IS_VMALLOC_bz1637125/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmcore_J2973424 burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmcore_J2999302 burn.khw2.lab.eng.bos.redhat.com/4.18.0-27.el8_5level_exception_RIP_bz1642221/vmlinux.gz
+# burn.khw2.lab.eng.bos.redhat.com/bz485073_1_eventpoll/vmlinux.gz  burn.khw2.lab.eng.bos.redhat.com/bz485073_1_eventpoll/vmcore_alex_test
+burn.khw2.lab.eng.bos.redhat.com/bz591285-2.6.18-128.1.6_bitflip/738293-vmcore.orig burn.khw2.lab.eng.bos.redhat.com/bz591285-2.6.18-128.1.6_bitflip/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/bz591285-2.6.18-164.6.1_bitflip/vmcore.738283.05-08-04-46 burn.khw2.lab.eng.bos.redhat.com/bz591285-2.6.18-164.6.1_bitflip/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/KASLR_rhel7_bz1424943/vmcore-3.10.0-576.el7.bz1424943 burn.khw2.lab.eng.bos.redhat.com/KASLR_rhel7_bz1424943/vmlinux-3.10.0-576.el7.bz1424943.gz
+burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/ovmf.rhel7.dump burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/seabios.rhel7.dump burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/rhel5-crashme.error_code_0/vmcore burn.khw2.lab.eng.bos.redhat.com/waste/rhel5-crashme.error_code_0/vmlinux-2.6.18-1.3014.2.5.el5.bz213313.4.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/rhel5_sysrq_c/vmcore.kbd burn.khw2.lab.eng.bos.redhat.com/waste/rhel5_sysrq_c/vmlinux-2.6.18-45.el5.bz224373.2.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/rhel5_sysrq_c/vmcore.trigger burn.khw2.lab.eng.bos.redhat.com/waste/rhel5_sysrq_c/vmlinux-2.6.18-45.el5.bz224373.2.gz
+crash.usersys.redhat.com/2.6.32-131.0.15.el6_cgroup_runq/vmcore-BZ754291-2.6.32-131.0.15.el6.x86_64 crash.usersys.redhat.com/2.6.32-131.0.15.el6_cgroup_runq/vmlinux-2.6.32-131.0.15.el6.x86_64.gz
+waste.usersys.redhat.com/4.18.0-115.el8_SME_bz1730143/vmcore.1 waste.usersys.redhat.com/4.18.0-115.el8_SME_bz1730143/vmlinux.gz
+waste.usersys.redhat.com/4.18.0-115.el8_SME_bz1730143/vmcore.2 waste.usersys.redhat.com/4.18.0-115.el8_SME_bz1730143/vmlinux.gz
+waste.usersys.redhat.com/4.18.0-115.el8_SME_bz1730143/vmcore.no_sme waste.usersys.redhat.com/4.18.0-115.el8_SME_bz1730143/vmlinux.gz
+DUMPLIST_END

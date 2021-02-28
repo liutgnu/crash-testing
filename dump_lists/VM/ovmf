@@ -1,0 +1,7 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/ovmf.rhel7.dump burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/seabios.rhel7.dump burn.khw2.lab.eng.bos.redhat.com/rhel7_OVMF_guest_1080698/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmcore.ovmf.rhel7.kdump-lzo burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmlinux-3.10.0-123.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmcore.ovmf.rhel7.kdump-snappy burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmlinux-3.10.0-123.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmcore.ovmf.rhel7.kdump-zlib burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmlinux-3.10.0-123.el7.gz
+DUMPLIST_END

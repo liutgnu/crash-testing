@@ -1,0 +1,5 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/RT-2.6.33.7-rt29.47.el5rt/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/RT-2.6.33.7-rt29.47.el5rt/vmcore-2.6.33.7-rt29.47.el5rt.c_d31
+burn.khw2.lab.eng.bos.redhat.com/2.6.24_rt_weird_exception_stacks/2006846-vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.24_rt_weird_exception_stacks/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/waste/rt_kernel/vmcore burn.khw2.lab.eng.bos.redhat.com/waste/rt_kernel/vmlinux.gz
+DUMPLIST_END

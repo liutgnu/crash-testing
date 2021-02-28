@@ -1,0 +1,24 @@
+DUMPLIST_START
+burn.khw2.lab.eng.bos.redhat.com/KVM-virsh-dump-3.10.0-121.el7_on_rhel7/vmcore burn.khw2.lab.eng.bos.redhat.com/KVM-virsh-dump-3.10.0-121.el7_on_rhel7/vmlinux-3.10.0-121.el7.gz
+burn.khw2.lab.eng.bos.redhat.com/virsh-dump-bt/4vcpus.2online.vmcore burn.khw2.lab.eng.bos.redhat.com/virsh-dump-bt/vmlinux-2.6.32-424.el6.gz
+burn.khw2.lab.eng.bos.redhat.com/virsh-dump-bt/vmcore burn.khw2.lab.eng.bos.redhat.com/virsh-dump-bt/vmlinux-2.6.32-424.el6.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5_HVM_virsh_dump/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5_HVM_virsh_dump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5xen_virsh_dump/vmcore burn.khw2.lab.eng.bos.redhat.com/2.6.18-152.el5xen_virsh_dump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/QEMU.ubuntu/mrelay5.virsh.dump burn.khw2.lab.eng.bos.redhat.com/QEMU.ubuntu/vmlinux-2.6.31-17-server.gz
+burn.khw2.lab.eng.bos.redhat.com/rhel6-64fv2-smp-virsh-dump/rhel6-64fv2-smp-crash burn.khw2.lab.eng.bos.redhat.com/rhel6-64fv2-smp-virsh-dump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/2.6.32-26.el6.jtltest.005_virsh_dump/rhel6.core burn.khw2.lab.eng.bos.redhat.com/2.6.32-26.el6.jtltest.005_virsh_dump/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/KVM-virsh-5GB_ram_version_4/live.dump burn.khw2.lab.eng.bos.redhat.com/KVM-virsh-5GB_ram_version_4/vmlinux.gz  burn.khw2.lab.eng.bos.redhat.com/KVM-virsh-5GB_ram_version_4/mapfile
+crash.usersys.redhat.com/KVM-virsh-dump/save.qemu crash.usersys.redhat.com/KVM-virsh-dump/vmlinux-2.6.18-157.el5.gz
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-30.el6/rhel6.core crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-30.el6/vmlinux-2.6.32-30.el6.gz
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.31.5-127.fc12/core.dump crash.usersys.redhat.com/KVM-virsh-dump-2.6.31.5-127.fc12/vmlinux_f12.gz
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.18-194.el5/rhel5x86_64-normal.dump crash.usersys.redhat.com/KVM-virsh-dump-2.6.18-194.el5/vmlinux-2.6.18-194.el5.gz
+crash.usersys.redhat.com/KVM-virsh_dump-rhel5-on-rhel5/rhel5x86_64-on-rhel5.dump crash.usersys.redhat.com/KVM-virsh_dump-rhel5-on-rhel5/vmlinux-2.6.18-194.el5.gz
+crash.usersys.redhat.com/KVM-virsh-dump-ram_version_id_4/rhel6.img crash.usersys.redhat.com/KVM-virsh-dump-ram_version_id_4/vmlinux.gz
+crash.usersys.redhat.com/RHEL6_xen_pvops/vmlinux.gz crash.usersys.redhat.com/RHEL6_xen_pvops/2010-0628-1314.28-rhel6-64pv.8.core_virsh_dump
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-44.el6/vmlinux.gz crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-44.el6/rhel6.smp
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-44.el6/vmlinux.gz crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-44.el6/rhel6.up
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-70.el6-live/virsh-dump-spin crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-70.el6-live/vmlinux.gz
+crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-71.el6-vgettimeofday/rhel6_x86_64_hvm.img crash.usersys.redhat.com/KVM-virsh-dump-2.6.32-71.el6-vgettimeofday/vmlinux.gz
+crash.usersys.redhat.com/2.6.32-220.el6_virsh_dump_memory_only/rhel6.2_x86_64 crash.usersys.redhat.com/2.6.32-220.el6_virsh_dump_memory_only/vmlinux-2.6.32-220.el6.x86_64.gz
+crash.usersys.redhat.com/KVM-virsh-dump-memory-only-2.6.32-424.el6/vmcore crash.usersys.redhat.com/KVM-virsh-dump-memory-only-2.6.32-424.el6/vmlinux-2.6.32-424.el6.gz
+DUMPLIST_END
