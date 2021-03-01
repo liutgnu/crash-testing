@@ -152,7 +152,7 @@ if [[ ! $COMMAND_FILE == "" && ! $COMMANDLIST_FILE == "" ]]; then
     print_useage && exit 1
 fi
 
-if [ ! -x $CRASH ]; then
+if [[ $CRASH == "" || ! -x $CRASH ]]; then
     echo "Error crash path $CRASH not exist or executable!" 1>&2
     exit 1
 fi
