@@ -1,6 +1,6 @@
 DUMPLIST_START
-burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM
-burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM_AFTER_CRASH
+burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM@0
+burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM_AFTER_CRASH@0
 burn.khw2.lab.eng.bos.redhat.com/QEMU.ubuntu/mrelay5.virsh.dump burn.khw2.lab.eng.bos.redhat.com/QEMU.ubuntu/vmlinux-2.6.31-17-server.gz
 crash.usersys.redhat.com/KVM-virsh-dump/save.qemu crash.usersys.redhat.com/KVM-virsh-dump/vmlinux-2.6.18-157.el5.gz
 crash.usersys.redhat.com/2.6.32-220.el6_cgroup_runq/vmcore-qemu-2.6.32-220.el6.x86_64 crash.usersys.redhat.com/2.6.32-220.el6_cgroup_runq/vmlinux.gz

@@ -58,8 +58,8 @@ burn.khw2.lab.eng.bos.redhat.com/3.10.0-229.el7_slub_corruption_dumps_1318620/vm
 burn.khw2.lab.eng.bos.redhat.com/3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmcore burn.khw2.lab.eng.bos.redhat.com/3.10.0-274.el7_NULL_pointer_0000000000000038_1234769/vmlinux-3.10.0-274.el7.gz
 burn.khw2.lab.eng.bos.redhat.com/ORC/vmcore burn.khw2.lab.eng.bos.redhat.com/ORC/vmlinux.gz
 burn.khw2.lab.eng.bos.redhat.com/PEGAS_4.11.0-1.el7_trace-cmd/vmcore burn.khw2.lab.eng.bos.redhat.com/PEGAS_4.11.0-1.el7_trace-cmd/vmlinux.gz
-burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM
-burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM_AFTER_CRASH
+burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM@0
+burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/vmlinux.gz burn.khw2.lab.eng.bos.redhat.com/QEMU_ramdumps/MEM_AFTER_CRASH@0
 burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmcore.ovmf.rhel7.kdump-lzo burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmlinux-3.10.0-123.el7.gz
 burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmcore.ovmf.rhel7.kdump-snappy burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmlinux-3.10.0-123.el7.gz
 burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmcore.ovmf.rhel7.kdump-zlib burn.khw2.lab.eng.bos.redhat.com/OVMF_compressed/vmlinux-3.10.0-123.el7.gz
