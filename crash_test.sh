@@ -263,7 +263,8 @@ function collect_subprocess_log()
     CHILD_INSTANCE_OUTPUT="$1"."$2"
     PARENT_INSTANCE_OUTPUT="$1"."$3"
     [[ -f $CHILD_INSTANCE_OUTPUT ]] && \
-        cat $CHILD_INSTANCE_OUTPUT >> $PARENT_INSTANCE_OUTPUT
+        cat $CHILD_INSTANCE_OUTPUT >> $PARENT_INSTANCE_OUTPUT || \
+        echo "Not found $CHILD_INSTANCE_OUTPUT" 1>&2
     rm -f $CHILD_INSTANCE_OUTPUT    
 }
 
@@ -327,9 +328,12 @@ if [ ! $CONCURRENCY == "" ]; then
 
     # Collecting logs of subprocesses
     for ((i=0;i<${#SPLIT_ARRAY[@]};i++)); do
-        collect_subprocess_log $CRASH_FINAL_OUTPUT ${PIDS_ARRAY[$i]} $$
+        # Eg: From /tmp/.crash.log.$$ to /tmp/.crash.log
+        PREFIX=$(echo $CRASH_INSTANCE_OUTPUT | rev | cut -d'.' -f2- | rev)
+        collect_subprocess_log $PREFIX ${PIDS_ARRAY[$i]} $$
         if [[ ! $CRASH2 == "" ]]; then
-            collect_subprocess_log $CRASH2_FINAL_OUTPUT ${PIDS_ARRAY[$i]} $$
+            PREFIX=$(echo $CRASH2_INSTANCE_OUTPUT | rev | cut -d'.' -f2- | rev)
+            collect_subprocess_log $PREFIX ${PIDS_ARRAY[$i]} $$
         fi
         if [[ $USER_SET_STOP_ON_FAILURE == TRUE && ${EXIT_VAL_ARRAY[$i]} -ne 0 ]]; then
             break
