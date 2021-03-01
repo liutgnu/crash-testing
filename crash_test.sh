@@ -490,7 +490,6 @@ cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
 do
     FAILURE_FLAG=FALSE
     DO_NOT_STOP_ON_FAILURE=FALSE
-    DUMPLIST_INDEX=$(($DUMPLIST_INDEX + 1))
 
     # comment or empty lines
     if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
@@ -502,6 +501,7 @@ do
         continue
     fi
 
+    DUMPLIST_INDEX=$(($DUMPLIST_INDEX + 1))
     echo "[Test $DUMPLIST_INDEX]"
     if [[ $ARG1 == "live" ]]; then
         echo "[Dumpfile $ARG1]"
