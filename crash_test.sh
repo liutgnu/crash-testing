@@ -311,7 +311,7 @@ if [ ! $CONCURRENCY == "" ]; then
 
     # Subprocess waiting
     for ((i=0;i<${#SPLIT_ARRAY[@]};i++)); do
-        wait -fn ${PIDS_ARRAY[$i]}
+        wait -n ${PIDS_ARRAY[$i]}
         EXIT_VAL_ARRAY[$i]=$?
         # Eg: If user set stop on failure and the 2nd item(which belongs to 
         # $SPLIT_OUTPUT_PREFIX.0) of original dumplist fails, thus processes
@@ -526,7 +526,7 @@ do
         invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT &
         PID[1]=$!
         for ((i=0;i<2;i++)); do
-            wait -fn ${PID[$i]}
+            wait -n ${PID[$i]}
             EXIT_VAL[$i]=$?
         done
         # 1st check: the return value diff
