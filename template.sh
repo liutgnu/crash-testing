@@ -7,6 +7,7 @@
 trap "exit 0;" SIGINT SIGTERM
 trap "exit_template;" EXIT
 PIPE="/tmp/pipe_$RANDOM"
+TIMEOUT=600 # 5minute, 5x60/0.5=600 
 
 function init_template()
 {
@@ -89,8 +90,8 @@ function run_template()
             # redirecting the output to the pipe.
             echo "${BASH_REMATCH[1]} > $PIPE"
             # Now we read from pipe, get the value of {{var}}
-            while true; do
-                sleep 0.2
+            for((i=0;i<$TIMEOUT;i++)); do
+                sleep 0.5
                 # This echo is used to check pipe's functionality, or the 
                 # status of crash process. If crash has exited due to some
                 # error, when echo here, we will receive SIGPIPE, which will 
@@ -103,6 +104,12 @@ function run_template()
                     break
                 fi
             done
+            if [ $i -ge $TIMEOUT ]; then
+                # No problem here, assigning empty string to the variable will 
+                # force the program terminated once evaluate it. Checked in
+                # if [[ ${!VR} == "" ]] ...
+                eval "$VR"=""
+            fi
         else
             # If no template variable assignment, do nothing.
             echo $LINE
