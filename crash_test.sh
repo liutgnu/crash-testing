@@ -21,6 +21,7 @@ DIFF_TOOL=""
 TIMESTAMP='{print strftime("%F %T"),$0;fflush()}'
 TIMEDELTA='BEGIN{t=systime()}{s=systime();printf("% 3d %s\n",s-t,$0);t=s;fflush()}'
 ALL_ARGS="$@"
+TEMPLATE_PIPE_PREFIX="/tmp/pipe_"
 SPLIT_OUTPUT_PREFIX="/tmp/.crash_dumplist_split."
 if [[ $DUMPLIST_INDEX == "" ]]; then
     DUMPLIST_INDEX=0
@@ -108,7 +109,8 @@ function delete_tmp_files()
 {
     rm -f $CRASH_INSTANCE_JUNK_OUTPUT \
         $CRASH2_INSTANCE_JUNK_OUTPUT \
-        $MERGED_COMMANDS
+        $MERGED_COMMANDS \
+        $TEMPLATE_PIPE_PREFIX*
     if [[ ! $CONCURRENCY == "" ]]; then
         rm -f $SPLIT_OUTPUT_PREFIX*
         rm -f `echo $CRASH_INSTANCE_OUTPUT | \
