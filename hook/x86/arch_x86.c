@@ -44,7 +44,7 @@ void find_and_replace(void *start, void *end, void *target, void *replacement)
 {
         u_int8_t *p;
         for (p = start; (void *)p < end; p++) {
-                if (*p == 0xe8) {
+                if (*p == 0xe8 || *p == 0xe9) {
                         if (*(int32_t *)(p + 1) + p + 5 == target) {
                                 *(int32_t *)(p + 1) = (int32_t)((u_int8_t *)replacement - 5 - p);
                         } else {
