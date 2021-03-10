@@ -1,4 +1,7 @@
 DUMPLIST_START
-waste.usersys.redhat.com/5.1.0-0.rc1.1.elrdy_IKCONFIG/vmlinux.gz waste.usersys.redhat.com/5.1.0-0.rc1.1.elrdy_IKCONFIG/vmcore
-waste.usersys.redhat.com/3.10.0-693.17.1.el7_vmap_area_NULL_link/vmcore waste.usersys.redhat.com/3.10.0-693.17.1.el7_vmap_area_NULL_link/vmlinux.gz
+#burn.khw2.lab.eng.bos.redhat.com/kazio_x86_64-4.15.18/vmcore burn.khw2.lab.eng.bos.redhat.com/kazio_x86_64-4.15.18/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-57.el8_dev-pdD/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-57.el8_dev-pdD/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.18.0-44.el8_with_user_pages/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-44.el8_with_user_pages/vmlinux.gz
+burn.khw2.lab.eng.bos.redhat.com/4.20.0-0.rc3.1.elrdy_sysrq_c/vmcore-4.20.0-0.rc3.1.elrdy burn.khw2.lab.eng.bos.redhat.com/4.20.0-0.rc3.1.elrdy_sysrq_c/vmlinux.gz
+#burn.khw2.lab.eng.bos.redhat.com/4.18.0-3.el8_HARD_lockup_on_IRQ_stack/vmcore burn.khw2.lab.eng.bos.redhat.com/4.18.0-3.el8_HARD_lockup_on_IRQ_stack/vmlinux.gz
 DUMPLIST_END

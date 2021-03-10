@@ -85,7 +85,7 @@ rm -f $SPLIT_OUTPUT_PREFIX*
 # wants
 cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
     while read -r LINE \
-        && { [ $COUNT == ${SPLIT_RESULT_ARRAY[$ARRAY_INDEX]} ] \
+        && { [ "$COUNT" == "${SPLIT_RESULT_ARRAY[$ARRAY_INDEX]}" ] \
             && { COUNT=0; ARRAY_INDEX=$(($ARRAY_INDEX + 1)); } \
             || true; }; do
 

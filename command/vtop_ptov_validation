@@ -13,6 +13,6 @@ COMMAND_START
 @ ! echo {{content2}} | md5sum | cut -f1 -d" " > {{content_md5_2}}
 @ echo "Content1 md5sum: {{content_md5_1}}"
 @ echo "Content2 md5sum: {{content_md5_2}}"
-@ ! [[ "{{content_md5_1}}"=="{{content_md5_2}}" ]] && echo "Content compare GOOD" || echo "Content compare BAD"
+@ ! [[ "{{content_md5_1}}" == "{{content_md5_2}}" ]] && echo "Content compare GOOD" || echo "Content compare BAD"
 q
 COMMAND_END

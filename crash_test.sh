@@ -10,13 +10,15 @@ THIS_FILE=$CURRENT_DIR/$FILE_NAME
 # Final output is report for users.
 CRASH_INSTANCE_OUTPUT="/tmp/.crash.log.$$"
 CRASH_FINAL_OUTPUT="/tmp/crash.log"
+CRASH_FINAL_FILTERED_OUTPUT="/tmp/crash_filtered.log"
 CRASH_INSTANCE_JUNK_OUTPUT="/tmp/.crash_junk.log.$$"
 CRASH2_INSTANCE_OUTPUT="/tmp/.crash2.log.$$"
 CRASH2_FINAL_OUTPUT="/tmp/crash2.log"
+CRASH2_FINAL_FILTERED_OUTPUT="/tmp/crash2_filtered.log"
 CRASH2_INSTANCE_JUNK_OUTPUT="/tmp/.crash2_junk.log.$$"
 MERGED_COMMANDS="/tmp/.merged_commands.log.$$"
 COMMANDLIST_INDEX=0
-VERBOSE_MODE=FALSE
+VERBOSE_MODE=TRUE
 DIFF_TOOL=""
 TIMESTAMP='{print strftime("%F %T"),$0;fflush()}'
 TIMEDELTA='BEGIN{t=systime()}{s=systime();printf("% 3d %s\n",s-t,$0);t=s;fflush()}'
@@ -26,6 +28,11 @@ SPLIT_OUTPUT_PREFIX="/tmp/.crash_dumplist_split."
 if [[ $DUMPLIST_INDEX == "" ]]; then
     DUMPLIST_INDEX=0
 fi
+HOOK_ERROR_SO=$CURRENT_DIR/hook/hook_error.so
+ARCH=$(uname -m)
+SHOULD_RESET_SELINUX=""
+source $CURRENT_DIR/log_filter.sh
+source $CURRENT_DIR/compile_hook.sh
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
@@ -38,7 +45,7 @@ DO_LOCAL=FALSE
 VERIFY=FALSE
 TIME_COMMAND='{print $0}'
 CRASH2=""
-SUDO=""
+SUDO=
 OPTARGS="-s "
 USER_SET_STOP_ON_FAILURE=FALSE
 CONCURRENCY=""
@@ -60,7 +67,7 @@ function print_useage()
     echo "-t           Print timestamp"
     echo "-T           Print timedelta"
     echo "-s           Stop on failure"
-    echo "-m           More verbose log output"
+#    echo "-m           More verbose log output"
     echo "-u [NUM]     Run in NUM concurrency"
     echo "-e [FILE]    Specify extra crash for behaviour comparison"
     echo "-o [OPTS]    Specify options for crash (and for extra crash as well if -e exist)"
@@ -107,26 +114,37 @@ done
 
 function delete_tmp_files()
 {
-    rm -f $CRASH_INSTANCE_JUNK_OUTPUT \
-        $CRASH2_INSTANCE_JUNK_OUTPUT \
-        $MERGED_COMMANDS \
-        $TEMPLATE_PIPE_PREFIX*
-    if [[ ! $CONCURRENCY == "" ]]; then
+    # Only main process can do tmp-files clean up.
+    if [[ ! "$CONCURRENT_SUBPROCESS" == "TRUE" ]]; then
+        rm -f $TEMPLATE_PIPE_PREFIX*
         rm -f $SPLIT_OUTPUT_PREFIX*
         rm -f `echo $CRASH_INSTANCE_OUTPUT | \
             sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $CRASH2_INSTANCE_OUTPUT | \
-            sed -E "s/.[0-9]+$/.*/"`        
+            sed -E "s/.[0-9]+$/.*/"`
+        rm -f `echo $CRASH_INSTANCE_JUNK_OUTPUT | \
+            sed -E "s/.[0-9]+$/.*/"`
+        rm -f `echo $CRASH2_INSTANCE_JUNK_OUTPUT | \
+            sed -E "s/.[0-9]+$/.*/"`
+        rm -f `echo $MERGED_COMMANDS | \
+            sed -E "s/.[0-9]+$/.*/"`
     fi
+}
+
+function terminate_and_cleanup()
+{
+    if [[ ! $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
+        echo "The program is terminated by user."
+        test_and_restore_selinux
+        delete_tmp_files
+        trap - SIGTERM SIGINT && kill -- -$$ 2>/dev/null;
+    fi
+    exit 0
 }
 
 # The script will generate subprocesses, so terminate them when we
 # receive signals.
-trap '
-    echo "The program is terminated by user.";
-    trap - SIGTERM SIGINT && kill -- -$$ 2>/dev/null;
-    unset CONCURRENT_SUBPROCESS;
-    exit 0' SIGTERM SIGINT
+trap 'terminate_and_cleanup' SIGTERM SIGINT
 trap "delete_tmp_files" EXIT
 
 ###############Start check inputs####################
@@ -158,10 +176,14 @@ if [[ $CRASH == "" || ! -x $CRASH ]]; then
     echo "Error crash path $CRASH not exist or executable!" 1>&2
     exit 1
 fi
+CRASH=$(readlink -f $CRASH)
 
 if [[ ! $CRASH2 == "" && ! -x $CRASH2 ]]; then
     echo "Error crash2 path $CRASH2 not exist or executable!" 1>&2
     exit 1
+fi
+if [[ ! $CRASH2 == "" ]]; then
+    CRASH2=$(readlink -f $CRASH2)
 fi
 
 # CONCURRENCY should be 1,2,3...
@@ -169,6 +191,10 @@ CONCURRENCY_REGX='^[1-9][0-9]*$'
 if [[ ! $CONCURRENCY == "" && ! $CONCURRENCY =~ $CONCURRENCY_REGX ]]; then
     echo "Error: $CONCURRENCY is not valid concurrency!" 1>&2
     exit 1
+fi
+
+if [[ ! $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
+    check_and_compile_hook
 fi
 
 echo "We are using crash path $CRASH..."
@@ -221,15 +247,31 @@ function output_final_and_popup_show_diff()
 {
     if [[ -f $CRASH_INSTANCE_OUTPUT ]]; then
         mv $CRASH_INSTANCE_OUTPUT $CRASH_FINAL_OUTPUT
+        echo "Now filtering $CRASH_FINAL_OUTPUT log, please wait..."
+        cat $CRASH_FINAL_OUTPUT | log_filter > $CRASH_FINAL_FILTERED_OUTPUT
     fi
-    if [[ ! $CRASH2 == "" && -f $CRASH2_INSTANCE_OUTPUT ]]; then
-        mv $CRASH2_INSTANCE_OUTPUT $CRASH2_FINAL_OUTPUT
-        if [ ! $DIFF_TOOL == "" ]; then
-            echo "Now invoke $DIFF_TOOL to present diff..."
-            $DIFF_TOOL $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT
-        else
-            echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\"" 1>&2
+
+    if [[ ! $CRASH2 == "" ]]; then
+        if [[ -f $CRASH2_INSTANCE_OUTPUT ]]; then
+            mv $CRASH2_INSTANCE_OUTPUT $CRASH2_FINAL_OUTPUT
+            echo "Now filtering $CRASH2_FINAL_OUTPUT log, please wait..."
+            cat $CRASH2_FINAL_OUTPUT | log_filter > $CRASH2_FINAL_FILTERED_OUTPUT
         fi
+        if [ ! $DIFF_TOOL == "" ]; then
+            echo 
+            echo "---------------------------"
+            echo "Please type the following cmd to view log diff:"
+        else
+            echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\""
+            echo "Then type the following cmd to view log diff:" 
+            DIFF_TOOL="<difftool>"
+        fi
+        echo
+        echo "Filtered log(smaller in size) diff:"
+        echo $DIFF_TOOL $CRASH_FINAL_FILTERED_OUTPUT $CRASH2_FINAL_FILTERED_OUTPUT
+        echo "Non-Filtered log(larger in size) diff:"
+        echo $DIFF_TOOL $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT
+        echo "All done!"
     fi
 }
 
@@ -246,6 +288,7 @@ function print_message_and_exit()
 }
 ###############End check difftools####################
 
+delete_tmp_files
 ###############Start dealing concurrency##############
 function list_process_all_descendants()
 {
@@ -343,7 +386,7 @@ if [ ! $CONCURRENCY == "" ]; then
     done
 
     output_final_and_popup_show_diff
-    rm -f $SPLIT_OUTPUT_PREFIX*
+    test_and_restore_selinux
     # If EXIT_VAL_ARRAY contains numbers other than 0, then fails.
     print_message_and_exit $([[ ${EXIT_VAL_ARRAY[@]} =~ [1-9]+ ]] && echo 1 || echo 0)
 fi
@@ -375,7 +418,6 @@ done
 ###############End check crashrc######################
 rm -f $CRASH_INSTANCE_OUTPUT \
     $CRASH2_INSTANCE_OUTPUT
-delete_tmp_files
 
 ###############Start merge commands###################
 function output_each_command_file()
@@ -428,7 +470,9 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
     cd ~-
 else
     # it's command file
+    cd $COMMANDS_TOP_DIR
     output_each_command_file $COMMAND_FILE $MERGED_COMMANDS
+    cd ~-
 fi
 echo "q" >> $MERGED_COMMANDS
 echo "COMMAND_END" >> $MERGED_COMMANDS
@@ -445,27 +489,28 @@ function invoke_crash()
 {
     # $1:crash path, $2:junk output log path
     source $CURRENT_DIR/template.sh
-    init_template
+    # init_template
     echo "[Test $DUMPLIST_INDEX]" > $2
     if [ $ARG1 == "live" ]; then
         echo "[Dumpfile $ARG1]" >> $2
-        SUDO="sudo"
+        SUDO="sudo -E"
         ARG1=""
     else
         echo "[Dumpfile $ARG1 $ARG2]" >> $2
     fi
-    echo $SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
-        tee -a $2
+
+    CRASH_CMD="$SUDO LD_PRELOAD=$CRASH_ENV $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
+    echo $CRASH_CMD | tee -a $2
 
     cat $MERGED_COMMANDS | \
-        sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | \
-        run_template | \
-        $SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS | \
+        sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | 
+        # run_template | \
+        eval $CRASH_CMD | \
         awk "$TIME_COMMAND" | \
         tee -a $2
     # We want to log and return crash exit code
     EXIT_VAL=${PIPESTATUS[3]}
-    exit_template
+    # exit_template
     echo -e "Crash returnd with $EXIT_VAL\n" | tee -a $2
     return $EXIT_VAL
 }
@@ -516,7 +561,9 @@ do
     fi
 
     if [[ $CRASH2 == "" ]]; then
-        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT &
+        PID=$!
+        wait -n $PID
         EXIT_VAL=$?
         if [ $EXIT_VAL -ne 0 ]; then
             FAILURE_FLAG=TRUE
@@ -551,7 +598,7 @@ do
         fi
         # 3rd check: the output junk
         if [ ! "$(sum $CRASH_INSTANCE_JUNK_OUTPUT)" == "$(sum $CRASH2_INSTANCE_JUNK_OUTPUT)" ]; then
-            echo "Crash output mismatch, check diff in $CRASH_INSTANCE_OUTPUT and $CRASH2_INSTANCE_OUTPUT" 1>&2
+            echo "Crash output mismatch" 1>&2
             FAILURE_FLAG=TRUE
         fi
         # If we are in debug mode or failure occured, persist the output log
@@ -573,6 +620,7 @@ if [[ $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
     # We are subprocess, just exit with status.
     exit $EXIT_VAL
 else
+    test_and_restore_selinux
     output_final_and_popup_show_diff
     print_message_and_exit $EXIT_VAL
 fi

@@ -33,6 +33,10 @@ function sync_with_crash()
     echo "! echo $KEY > $PIPE"
     while true; do
         sleep 1
+        if [ ! -p "$PIPE" ]; then
+            echo "Pipe $PIPE not exist, abort..." 1>&2
+            exit 1
+        fi
         echo -e "\n"
         local TMP=\"$(cat 0<>$PIPE <$PIPE)\"
         if [[ "$TMP" == \""$KEY\"" ]]; then
