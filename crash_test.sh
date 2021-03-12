@@ -505,13 +505,14 @@ function invoke_crash()
     cat $MERGED_COMMANDS | \
         sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | 
         # run_template | \
-        eval $CRASH_CMD | \
+        eval $CRASH_CMD 2>&1 | \
         awk "$TIME_COMMAND" | \
         tee -a $2
-    # We want to log and return crash exit code
-    EXIT_VAL=${PIPESTATUS[3]}
+    # We want to log and return crash exit code.
+    # MUST change with the previous command accordingly.
+    EXIT_VAL=${PIPESTATUS[2]}
     # exit_template
-    echo -e "Crash returnd with $EXIT_VAL\n" | tee -a $2
+    echo -e "Crash returned with $EXIT_VAL\n" | tee -a $2
     return $EXIT_VAL
 }
 
