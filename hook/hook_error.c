@@ -14,7 +14,7 @@
 #ifdef x86_64
 #include "x86_64/arch_x64.h"
 #elif defined i386
-//#include "x86/arch_x86.h"
+#include "x86/arch_x86.h"
 #endif
 
 #define true 1
