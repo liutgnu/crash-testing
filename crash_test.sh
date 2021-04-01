@@ -31,7 +31,6 @@ fi
 HOOK_ERROR_SO=$CURRENT_DIR/hook/hook_error.so
 ARCH=$(uname -m)
 SHOULD_RESET_SELINUX=""
-source $CURRENT_DIR/log_filter.sh
 source $CURRENT_DIR/compile_hook.sh
 
 CRASH=$(which crash)
@@ -248,14 +247,14 @@ function output_final_and_popup_show_diff()
     if [[ -f $CRASH_INSTANCE_OUTPUT ]]; then
         mv $CRASH_INSTANCE_OUTPUT $CRASH_FINAL_OUTPUT
         echo "Now filtering $CRASH_FINAL_OUTPUT log, please wait..."
-        cat $CRASH_FINAL_OUTPUT | log_filter > $CRASH_FINAL_FILTERED_OUTPUT
+        $CURRENT_DIR/log_filter.sh $CRASH_FINAL_OUTPUT > $CRASH_FINAL_FILTERED_OUTPUT
     fi
 
     if [[ ! $CRASH2 == "" ]]; then
         if [[ -f $CRASH2_INSTANCE_OUTPUT ]]; then
             mv $CRASH2_INSTANCE_OUTPUT $CRASH2_FINAL_OUTPUT
             echo "Now filtering $CRASH2_FINAL_OUTPUT log, please wait..."
-            cat $CRASH2_FINAL_OUTPUT | log_filter > $CRASH2_FINAL_FILTERED_OUTPUT
+            $CURRENT_DIR/log_filter.sh $CRASH2_FINAL_OUTPUT > $CRASH2_FINAL_FILTERED_OUTPUT
         fi
         if [ ! $DIFF_TOOL == "" ]; then
             echo 
@@ -448,8 +447,7 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
     check_line_results "COMMANDLIST" $COMMANDLIST_FILE
 
     cd $COMMANDS_TOP_DIR
-    cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p" | \
-        while read ARG1 EXTRA_ARGS
+    while read ARG1 EXTRA_ARGS
     do
         # comment or empty lines
         if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
@@ -466,7 +464,7 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
             fi
         fi
         output_each_command_file $ARG1 $MERGED_COMMANDS
-    done
+    done <<< $(cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p")
     cd ~-
 else
     # it's command file
@@ -507,7 +505,8 @@ function invoke_crash()
         # run_template | \
         eval $CRASH_CMD 2>&1 | \
         awk "$TIME_COMMAND" | \
-        tee -a $2
+        tee -a $2 | \
+        $CURRENT_DIR/log_filter.sh
     # We want to log and return crash exit code.
     # MUST change with the previous command accordingly.
     EXIT_VAL=${PIPESTATUS[2]}
@@ -533,8 +532,7 @@ DUMPLIST_END_LINE=$(get_linenum_in_file $DUMPLIST_FILE "DUMPLIST_END")
 DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
 check_line_results "DUMPLIST" $DUMPLIST_FILE
 
-cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p" | \
-    while read ARG1 ARG2 EXTRA_ARGS
+while read ARG1 ARG2 EXTRA_ARGS
 do
     FAILURE_FLAG=FALSE
     DO_NOT_STOP_ON_FAILURE=FALSE
@@ -612,7 +610,8 @@ do
     if [[ $FAILURE_FLAG == TRUE ]]; then
         check_should_stop
     fi
-done
+done <<< $(cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p")
+
 EXIT_VAL=$?
 ###############The loop end###########################
 
