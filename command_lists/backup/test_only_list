@@ -1,4 +1,0 @@
-COMMANDLIST_START
-command/backup/get_nodename
-command/backup/memory_test
-COMMANDLIST_END

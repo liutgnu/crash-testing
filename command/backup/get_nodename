@@ -1,4 +1,0 @@
-COMMAND_START
-sys | grep NODENAME
-q 
-COMMAND_END

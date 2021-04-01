@@ -1,3 +1,5 @@
+# NOTE! This command list will give tremendous logs,
+# not recommended to test against a long list of vmcores.
 COMMANDLIST_START
 command/files_long
 command/kmem_long
