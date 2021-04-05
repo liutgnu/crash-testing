@@ -264,6 +264,11 @@ only have 32bit offset, may not be enough for 64bit address far jump. Thus I
 allocated a trampoline at the start of heap, then doing 64bit far jump there, 
 thus it will ask for heap execution permission when selinux is in enforcing status.
 
+Updating:
+---------
+Currently in the main branch the arch dependent code is removed. You can find the
+removed code in arch_dep branch.
+
 Future work
 -----------
 Variable implementation and error log filtering are 2 issues needed for 
