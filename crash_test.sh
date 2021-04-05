@@ -28,10 +28,6 @@ SPLIT_OUTPUT_PREFIX="/tmp/.crash_dumplist_split."
 if [[ $DUMPLIST_INDEX == "" ]]; then
     DUMPLIST_INDEX=0
 fi
-HOOK_ERROR_SO=$CURRENT_DIR/hook/hook_error.so
-ARCH=$(uname -m)
-SHOULD_RESET_SELINUX=""
-source $CURRENT_DIR/compile_hook.sh
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
@@ -144,7 +140,6 @@ function terminate_and_cleanup()
 {
     if [[ ! $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
         echo "The program is terminated by user."
-        test_and_restore_selinux
         delete_tmp_files
         trap - SIGTERM SIGINT && kill -- -$$ 2>/dev/null;
     fi
@@ -200,10 +195,6 @@ CONCURRENCY_REGX='^[1-9][0-9]*$'
 if [[ ! $CONCURRENCY == "" && ! $CONCURRENCY =~ $CONCURRENCY_REGX ]]; then
     echo "Error: $CONCURRENCY is not valid concurrency!" 1>&2
     exit 1
-fi
-
-if [[ ! $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
-    check_and_compile_hook
 fi
 
 echo "We are using crash path $CRASH..."
@@ -395,7 +386,6 @@ if [ ! $CONCURRENCY == "" ]; then
     done
 
     output_final_and_popup_show_diff
-    test_and_restore_selinux
     # If EXIT_VAL_ARRAY contains numbers other than 0, then fails.
     print_message_and_exit $([[ ${EXIT_VAL_ARRAY[@]} =~ [1-9]+ ]] && echo 1 || echo 0)
 fi
@@ -507,7 +497,7 @@ function invoke_crash()
         echo "[Dumpfile $ARG1 $ARG2]" >> $2
     fi
 
-    CRASH_CMD="$SUDO LD_PRELOAD=$CRASH_ENV $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
+    CRASH_CMD="$SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
     echo $CRASH_CMD | tee -a $2
 
     cat $MERGED_COMMANDS | \
@@ -630,7 +620,6 @@ if [[ $CONCURRENT_SUBPROCESS == "TRUE" ]]; then
     # We are subprocess, just exit with status.
     exit $EXIT_VAL
 else
-    test_and_restore_selinux
     output_final_and_popup_show_diff
     print_message_and_exit $EXIT_VAL
 fi
