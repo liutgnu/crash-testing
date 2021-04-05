@@ -51,25 +51,35 @@ CONCURRENCY=""
 
 function print_useage()
 {
-    echo "Useage: $FILE_NAME [OPTS]..."
     echo
-    echo "-f [FILE]    Specify crash, default is \"$(which crash)\" if crash installed"
-    echo "-D [DIR]     Specify top dir of vmcore"
-    echo "-d [FILE]    Specify dumpcore list file(must)"
-    echo "-C [DIR]     Specify top dir of commands, default to current dir"
-    echo "-c [FILE]    Specify crash commands list file"
-    echo "-b [FILE]    Specify crash commands file"
+    echo "Useage:"
+    echo
+    echo "Vmcore test:"
+    echo "  $FILE_NAME [OPTS] [-D <vmcore_dir>] -d <dumplist_file> -c <commandlist_file>"
+    echo "  $FILE_NAME [OPTS] [-D <vmcore_dir>] -d <dumplist_file> -b <command_file>"
+    echo "    vmcore_dir concatenate with item of dumplist_file should be the absolute path of vmcore,"
+    echo "    if items of dumplist_file are relative paths, then vmcore_dir should be applied."
+    echo "Live test:"
+    echo "  $FILE_NAME [OPTS] -a -d dump_lists/live_list -c <commandlist_file>"
+    echo "  $FILE_NAME [OPTS] -a -d dump_lists/live_list -b <command_file>"
+    echo
+    echo "-f <FILE>    Specify crash, default is \"$(which crash)\" if crash installed"
+    echo "-D <DIR>     Specify top dir of vmcore"
+    echo "-d <FILE>    Specify dumpcore list file(must)"
+    echo "-C <DIR>     Specify top dir of commands, default to current dir"
+    echo "-c <FILE>    Specify crash commands list file"
+    echo "-b <FILE>    Specify crash commands file"
     echo "                  One of -c and -b is a (must)"
     echo "-a           Live test"
-    echo "-l           (Not inplemented)Local test"
-    echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
+    # echo "-l           (Not inplemented)Local test"
+    # echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
     echo "-t           Print timestamp"
     echo "-T           Print timedelta"
     echo "-s           Stop on failure"
-#    echo "-m           More verbose log output"
-    echo "-u [NUM]     Run in NUM concurrency"
-    echo "-e [FILE]    Specify extra crash for behaviour comparison"
-    echo "-o [OPTS]    Specify options for crash (and for extra crash as well if -e exist)"
+    # echo "-m           More verbose log output"
+    echo "-u <NUM>     Run in NUM concurrency"
+    echo "-e <FILE>    Specify extra crash for behaviour comparison"
+    echo "-o <OPTS>    Specify options for crash (and for extra crash as well if -e exist)"
 }
 
 while getopts "f:d:D:C:c:b:alvtTsmu:e:o:" OPT; do
