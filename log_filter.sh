@@ -83,6 +83,7 @@ function log_filter()
             /Exit values are not 0/     {if (n < 1) {n=1; ahead=""}}
             /Crash returned with/       {if (n < 1) {n=1; ahead=""}}
             /Segmentation fault/        {if (n < 1) n=1}
+            /No such file or directory/        {if (n < 1) n=1}
             n-- > 0 {
                 # If a commandfile does not give any log, then we will not
                 # print it out.
