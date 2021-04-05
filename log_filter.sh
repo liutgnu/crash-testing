@@ -84,6 +84,7 @@ function log_filter()
             /Crash returned with/       {if (n < 1) {n=1; ahead=""}}
             /Segmentation fault/        {if (n < 1) n=1}
             /No such file or directory/        {if (n < 1) n=1}
+            /Permission denied/         {if (n < 1) n=1}
             n-- > 0 {
                 # If a commandfile does not give any log, then we will not
                 # print it out.
