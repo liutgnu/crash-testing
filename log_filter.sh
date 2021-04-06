@@ -75,7 +75,7 @@ function log_filter()
             /\[Test 1]/                 {if (n < 1) n=1}
             /\[Test /                   {if (n < 1) {n=1; ahead="\n"}}
             /\[Dumpfile /               {if (n < 2) n=2}
-            /\[Commandfile /            {if (n < 1) n=1}
+            /\[Command /                {if (n < 1) n=1}
             /Content compare BAD/       {if (n < 5) n=5}
             /FATAL<<<-->>>/             {if (n < 2) n=2}
             /FATAL_RESTART<<<-->>>/     {if (n < 2) n=2}
@@ -86,9 +86,9 @@ function log_filter()
             /No such file or directory/        {if (n < 1) n=1}
             /Permission denied/         {if (n < 1) n=1}
             n-- > 0 {
-                # If a commandfile does not give any log, then we will not
+                # If a command does not give any log, then we will not
                 # print it out.
-                if ($0 ~ /\[Commandfile /) {
+                if ($0 ~ /\[Command /) {
                         ahead=$0"\n"
                 } else {
                         printf("%s%s\n",ahead,$0);ahead=""

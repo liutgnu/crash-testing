@@ -437,12 +437,14 @@ function output_each_command_file()
     # Since each command file start with COMMAND_START
     # and end with exit/q and COMMAND_END. To combine different
     # command files together, we need to remove each file's COMMAND_* and exit/q,
-    # which will be created elsewhere. Then we add "echo [Commandfile THE_COMMAND_FILE]"
-    # at the place of COMMAND_START, by which we can output command file name as a label. 
+    # which will be created elsewhere. Then we add 
+    # "echo [Command $commandfile: $command]" before each command line, 
+    # to output the command we are currently processing.
     cat $1 | \
+        sed '/^\s*\(exit\|q\)\s*$/d' | \
         egrep -v "COMMAND_END" | \
-        sed "/COMMAND_START/s/^.*$/echo \"[Commandfile $ESCAPED_FILENAME]\"/" | \
-        sed '/^\s*\(exit\|q\)\s*$/d' \
+        awk -v FNAME="$1" '{if ($0 != "COMMAND_START" && $0 !~ /\s*#.*/)
+            {printf("echo \"[Command %s: %s]\"\n%s\n",FNAME,$0,$0)}}' \
         >> $2
 }
 
