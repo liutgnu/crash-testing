@@ -546,10 +546,10 @@ DUMPLIST_END_LINE=$(get_linenum_in_file $DUMPLIST_FILE "DUMPLIST_END")
 DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
 check_line_results "DUMPLIST" $DUMPLIST_FILE
 
+DO_NOT_STOP_ON_FAILURE=FALSE
 while read ARG1 ARG2 EXTRA_ARGS
 do
     FAILURE_FLAG=FALSE
-    DO_NOT_STOP_ON_FAILURE=FALSE
 
     # comment or empty lines
     if [[ $ARG1 == "#"* || $ARG1 == "" ]]; then
@@ -624,6 +624,8 @@ do
     if [[ $FAILURE_FLAG == TRUE ]]; then
         check_should_stop
     fi
+
+    DO_NOT_STOP_ON_FAILURE=FALSE
 done <<< $(cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p")
 
 EXIT_VAL=$?
