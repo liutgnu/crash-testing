@@ -57,8 +57,10 @@ function print_useage()
     echo "Vmcore test:"
     echo "  $FILE_NAME [OPTS] [-D <vmcore_dir>] -d <dumplist_file> -c <commandlist_file>"
     echo "  $FILE_NAME [OPTS] [-D <vmcore_dir>] -d <dumplist_file> -b <command_file>"
-    echo "    vmcore_dir concatenate with item of dumplist_file should be the absolute path of vmcore,"
-    echo "    if items of dumplist_file are relative paths, then vmcore_dir should be applied."
+    echo "      vmcore_dir concatenate with item of dumplist_file should be the" 
+    echo "      absolute path of vmcore, if items of dumplist_file are relative"
+    echo "      paths, then vmcore_dir should be applied."
+    echo
     echo "Live test:"
     echo "  $FILE_NAME [OPTS] -a -d dump_lists/live_list -c <commandlist_file>"
     echo "  $FILE_NAME [OPTS] -a -d dump_lists/live_list -b <command_file>"
