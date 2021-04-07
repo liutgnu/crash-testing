@@ -532,7 +532,9 @@ function invoke_crash()
 function check_should_stop()
 {
     if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ] && [ "$DO_NOT_STOP_ON_FAILURE" = "FALSE" ]; then
-        exit 1
+        return 1
+    else
+        return 0
     fi
 }
 
@@ -623,12 +625,13 @@ do
     
     if [[ $FAILURE_FLAG == TRUE ]]; then
         check_should_stop
+        EXIT_VAL=$?
+        [ $EXIT_VAL -ne 0 ] && break
     fi
 
     DO_NOT_STOP_ON_FAILURE=FALSE
 done <<< $(cat $DUMPLIST_FILE | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p")
 
-EXIT_VAL=$?
 ###############The loop end###########################
 
 cd ~-
