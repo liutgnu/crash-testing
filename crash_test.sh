@@ -470,12 +470,7 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
         # check file exist
         if [ ! -f $ARG1 ]; then
             echo "Error: command file $COMMANDS_TOP_DIR/$ARG1 not found!" 1>&2
-            if [ "$USER_SET_STOP_ON_FAILURE" = "TRUE" ]; then
-                exit 1
-            else
-                echo "Stop on failure not set, continuing..." 1>&2
-                continue
-            fi
+            exit 1
         fi
         output_each_command_file $ARG1 $MERGED_COMMANDS
     done <<< $(cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p")
