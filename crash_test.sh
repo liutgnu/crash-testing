@@ -165,12 +165,22 @@ if [[ $DUMPLIST_FILE == "" || ! -f $DUMPLIST_FILE ]]; then
 fi
 DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
 
-if [[ ! $COMMAND_FILE == "" && -f $COMMAND_FILE ]]; then
-    COMMAND_FILE=$(readlink -f $COMMAND_FILE)
+if [ ! $COMMAND_FILE == "" ]; then
+    if [ -f $COMMAND_FILE ]; then
+        COMMAND_FILE=$(readlink -f $COMMAND_FILE)
+    else
+        echo "Error $COMMAND_FILE not exist!" 1>&2
+        exit 1
+    fi
 fi
 
-if [[ ! $COMMANDLIST_FILE == "" && -f $COMMANDLIST_FILE ]]; then
-    COMMANDLIST_FILE=$(readlink -f $COMMANDLIST_FILE)
+if [ ! $COMMANDLIST_FILE == "" ]; then
+    if [ -f $COMMANDLIST_FILE ]; then
+        COMMANDLIST_FILE=$(readlink -f $COMMANDLIST_FILE)
+    else
+        echo "Error $COMMANDLIST_FILE not exist!" 1>&2
+        exit 1
+    fi
 fi
 
 if [[ $COMMAND_FILE == "" && $COMMANDLIST_FILE == "" ]]; then
