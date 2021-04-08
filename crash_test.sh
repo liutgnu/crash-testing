@@ -442,11 +442,16 @@ function output_each_command_file()
     # which will be created elsewhere. Then we add 
     # "echo [Command $commandfile: $command]" before each command line, 
     # to output the command we are currently processing.
+    #
+    # As for complex commands like the ones in command/vtop_ptov_validation,
+    # we won't print it out.
     cat $1 | \
         sed '/^\s*\(exit\|q\)\s*$/d' | \
+        sed '/^\s*$/d' | \
         egrep -v "COMMAND_END" | \
-        awk -v FNAME="$1" '{if ($0 != "COMMAND_START" && $0 !~ /\s*#.*/)
-            {printf("echo \"[Command %s: %s]\"\n%s\n",FNAME,$0,$0)}}' \
+        awk -v FNAME="$1" '{if ($0 != "COMMAND_START" && $0 !~ /^\s*#.*/)
+            {if($0 ~ /^\s*@.*/){print $0}
+            else{printf("echo \"[Command %s: %s]\"\n%s\n",FNAME,$0,$0)}}}' \
         >> $2
 }
 
