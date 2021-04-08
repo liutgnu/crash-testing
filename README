@@ -1,19 +1,55 @@
 crash-testing
 =============
 
-Project goal:
--------------
-1) test for backward-compatibility, which will accepts many dumpfiles and do 
-   sanity checks.
-2) test for patch review, which compares the outputs of the current crash and
-   the patched crash.
-3) test for various commands(as a test module) in crash utility, such as 
-   vtop/ptov/rd, etc.
-4) output the test results to a file in a specific format.
-5) etc.
-
-Basic usage:
+Quick start:
 ------------
+A. test for backward-compatibility, which will accepts many dumpfiles and do 
+   sanity checks.
+   Eg: to test a list of vmcores against a list of crash commands:
+     ./crash_test.sh  \ 
+        -D /mnt/davea-vmcores  \
+        -d dump_list/all_list  \ 
+        -c command_lists/overall_short_output_list
+   The absolute path of each vmcore will be given by "/mnt/davea-vmcores" +
+   "each line of dump_list/all_list"
+   If -f is not specified, then automatically take $(which crash) by default.
+   You will have /tmp/crash.log and /tmp/crash_filtered.log generated. The
+   former is a complete log recording, the latter is a filtered one in smaller
+   size.
+
+B. test for patch review, which compares the outputs of the current crash and
+   the patched crash.
+   Eg: to specify 2 crash paths for output log diff:
+     ./crash_test.sh  \
+        -D /mnt/davea-vmcores  \
+        -d dump_list/all_list  \
+        -c command_lists/overall_short_output_list  \
+        -f /usr/bin/crash  \
+        -e ~/crash/crash
+   You will have /tmp/crash.log and /tmp/crash_filtered.log, which are generated
+   by -f, and /tmp/crash2.log and /tmp/crash2_filtered.log, which are generated
+   by -e.
+
+C. test for various commands(as a test module) in crash utility, such as 
+   vtop/ptov/rd, etc.
+   command_lists/overall_short_output_list are indexed commands which outputs
+   less log,
+   command_lists/overall_long_output_list are indexed commands which outputs
+   more log, please DO NOT testing it against a long list of vmcores.
+
+D. output the test results to a file in a specific format.
+   Eg: sample output log
+
+   [Test 1]                                  ----> vmcore index number
+   [Dumpfile dir1/vmlinux.gz dir1/vmcore]    ----> vmcore path  
+   /usr/bin/crash -s dir1/vmlinux.gz dir1/vmcore   ----> crash command line
+   [Command command/alias: alias]            ----> testing command 1
+   ....                                      ----> command 1 output
+   [Command command/ascii: ascii]            ----> testing command 2
+   ....                                      ----> command 2 output
+
+Basic usage workflow:
+---------------------
 1) Prepare your vmcores into a specific directory. 
    Eg: /mnt/davea-vmcores
    It's recommended to make /mnt/davea-vmcores/ and sub-dirs and sub-files 
@@ -58,8 +94,8 @@ Basic usage:
    The former is a complete log recording. The latter is a filtered one in 
    smaller size.
 
-Advanced usage:
----------------
+Advanced usage options:
+-----------------------
 A. Print timestamp in log(-t):
      ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
      command_lists/my_command_list -t
@@ -70,28 +106,22 @@ A. Print timestamp in log(-t):
      2021-03-10 07:53:13 builtin  ?        help 
      2021-03-10 07:53:13 builtin  quit     q 
 
-B. Specify your crash path(-f), If you don't specify crash path, then script 
-   will take default crash path given by $(which crash)
-     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
-     command_lists/my_command_list -f <crash-path>
-
-C. Specify another crash path(-e) for regression test and output comparsion. The
-   ouput files will be: /tmp/crash.log /tmp/crash_filtered.log for crash-path,
-   /tmp/crash2.log /tmp/crash2_filtered.log for another-crash-path.
-     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
-     command_lists/my_command_list -f <crash-path> -e <another-crash-path>
-
-D. Specify only one command file for testing, not a list of command files:
+B. Specify only one command file for testing, not a list of command files:
     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -b 
     command/my_command
 
-E. Start multi-threads(-u N) to acceralate testing. (-u 4) will start 4 threads 
+C. Start multi-threads(-u N) to acceralate testing. (-u 4) will start 4 threads 
    running at the same time. It can shorten the overall time if you have a long
    list of vmcores.
      ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
      command_lists/my_command_list -u 4
 
-F. You can exit by Ctrl+c whenever, and no logs will be preserved.
+D. You can exit by Ctrl+c whenever, and no logs will be preserved.
+
+E. Pass extra args(-o) to crash when testing. Also for crash2 as well if -e 
+   exits:
+     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
+     command_lists/my_command_list -o "--kaslr auto"
 
 Directory structure
 -------------------
@@ -109,44 +139,14 @@ dump_lists/:
   Directory of files for indexing different categories of vmcore files. live_list
   is used for live testing. You can make your own dump lists based on your vmcores.
 
-hook/:
-  Part of crash-testing, used for better testing log filtering.
-
 crash_test.sh:
   The main entry for crash-testing.
 
-Workflow
---------
-The workflow of crash-testing is:
+Future work
+-----------
+Variable implementation for crash shell. Currently the code is not stable, 
+need future improvement.
 
-1) crash_test.sh check input parameters.
-
-2) It will check current cpu arch, then make hook/hook_error.so.
-
-3) If passed argument (-u N), then we are in N(N >= 1) multi-threads, 
-   crash_test.sh will call dumplist_split.sh to averagely split the given 
-   dumplist into N pieces. The 1st piece will have dumplist range from 
-   1 ~ (Total/N), 2nd will have range from (Total/N+1) ~ (2*Total/N), etc.
-
-4) If in multi-thread, main crash-testing.sh thread will call crash-testing.sh 
-   N times, and pass the modified parameters to them to create sub-threads. 
-   Main thread will wait for sub-threads. After all sub-threads finish, main 
-   thread will collect logs generated by sub-threads, then create a overall log. 
-   Finally filtering by keywords to output logs in smaller size.
-
-5) If not in multi-thread, the behaviour is similar to the sub-threads which 
-   are created in multi-thread mode.
-
-6) No matter whether in multi-thread mode or not, if another-crash-path(-e) is 
-   given, 2 threads will be created simultaneously, one for crash-path(-f), 
-   another for another-crash-path(-e). Logs are collected separately.
-
-7) Because we have a list of command files to feed to crash through pipe, we 
-   will first merge those command files into one file, then cat the file one 
-   line at a time to crash.
-
-Special topic 1: Variable implementation for crash shell
---------------------------------------------------------
 Because the internal shell of crash doesn't support variables like bash. Eg 
 you cannot do variable substitution as:
     virtual_address=$(sym -l | grep -e '(T)\\|(t)' | sed "20p;d" | awk '{print $1}')
@@ -160,7 +160,7 @@ support, there will be a big amount of work to make the internal shell as good
 as bash. Currently it seems no urgent and not worthy to do when only beneficial 
 for automatic testing.
 
-I have made a variable implementation in template.sh as a substitute. You can 
+I have worked on variable implementation in template.sh as a substitute. You can 
 take command/vtop_ptov_validation as reference to get a general view. Basically,
 template.sh works in the middle of cat and crash:
     cat commandfile | template | crash
@@ -176,39 +176,7 @@ value within following commands if one need to evaluate it:
     vtop {{variable}} > {{variable2}}
 becomes:
     vtop "some_value" > /tmp/pipe_123
-Unfortunately, the code is not very stable currently, so I commented template 
-in crash_test.sh, thus command/vtop_ptov_validation will not work. You can 
-uncomment the following line to enable it:
-    function invoke_crash()
-    {
-        # $1:crash path, $2:junk output log path
-        source $CURRENT_DIR/template.sh
-        # init_template                     <------- uncomment this line
-        echo "[Test $DUMPLIST_INDEX]" > $2
-        if [ $ARG1 == "live" ]; then
-                echo "[Dumpfile $ARG1]" >> $2
-                SUDO="sudo -E"
-                ARG1=""
-        else
-                echo "[Dumpfile $ARG1 $ARG2]" >> $2
-        fi
 
-        CRASH_CMD="$SUDO LD_PRELOAD=$CRASH_ENV $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
-        echo $CRASH_CMD | tee -a $2
-
-        cat $MERGED_COMMANDS | \
-                sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | 
-                # run_template | \              <------- uncomment this line
-                eval $CRASH_CMD 2>&1 | \
-                awk "$TIME_COMMAND" | \
-                tee -a $2
-        # We want to log and return crash exit code.
-        # MUST change with the previous command accordingly.
-        EXIT_VAL=${PIPESTATUS[2]}           <------- change 2 to 3
-        # exit_template                     <------- uncomment this line
-        echo -e "Crash returned with $EXIT_VAL\n" | tee -a $2
-        return $EXIT_VAL
-    }
 This method is relatively easy and can work as a workaround to implement 
 variable support. Currently template.sh only support variable assignment and
 evaluation, it doesn't support advanced usage like if branch or for loop:
@@ -217,64 +185,6 @@ evaluation, it doesn't support advanced usage like if branch or for loop:
     @     sym -l | grep -e '(T)\\|(t)' | sed "20p;d" | awk '{print $1}' > {{virtual_addr1}}
     @     vtop {{virtual_addr1}} | sed -n 2p | awk '{print $2}' > {{physical_addr}}
     @ {{else}}
-    echo "xen hyper doesn't support vtop command!"
+          echo "xen hyper doesn't support vtop command!"
     @ {{endif}}
     q
-
-Special topic 2: Error log filtering
-------------------------------------
-Crash internally support many commands, such as bt/vtop/ptov etc. But they are 
-all void functions, so they don't give exit values like bash $?, making it hard 
-to identify whether a command has been executed correctly or not. Eg: giving an 
-illegal address to vtop. A failing command maybe an identification of bug and 
-regression error. So it's valuable for crash testing.
-
-The best way to get improved is to modify the command functions within crash 
-source code from "void" to return "int". It also may involve a lot of work, 
-and seems only useful for automatic testing currently.
-
-Another way to identify error command executing is to filter the error messages.
-If a command execution fails, it will print specific error message. But it may 
-be lack of agility, when we have to deal with a lot of different existing error 
-messages, and keep track of new error massages in the future.
-
-I have made a mechanism for error log filtering in directory hook/ and 
-log_filter.sh. The idea is to hack the error processing function in crash at 
-runtime. Whenever a command fails, it will call a universal error processing 
-function "int __error(int, char *, ...)". It will deal with "FATAL/INFO/NOTE..." 
-cases. When hacked successfully, everytime crash calls __error will output a 
-string "<<<-->>>" as well, which can be identified easily.
-
-The reason of hacking crash at runtime, is that when doing regression testing, 
-we may choose 2 old and new versions of crash. Runtime means no source code 
-dependency, thus we can pick any crash (built from source, yum installed in 
-binary form, copied from an old computer, etc). If backward compatibility is 
-important, then runtime hacking is recommended. Besides, runtime hacking is 
-happened only in memory, will have no side effect to disk files.
-
-In x86/x86_64 arch, function calling is achieved by instruction 
-"call xx xx xx xx". The xx is the offset address of the target function. So 
-the basic idea of hacking is to modify the address to our customized function. 
-After finishing our bussiness (print identification string), we then jump back 
-to the original function to proceed.
-
-The hacking is arch dependent, if we want to extend it to ARM/ppc/s390, we 
-need to implement separately. In addition, when in x86_64, the "call xx xx xx xx" 
-only have 32bit offset, may not be enough for 64bit address far jump. Thus I 
-allocated a trampoline at the start of heap, then doing 64bit far jump there, 
-thus it will ask for heap execution permission when selinux is in enforcing status.
-
-Updating:
----------
-Currently in the main branch the arch dependent code is removed. You can find the
-removed code in arch_dep branch.
-
-Future work
------------
-Variable implementation and error log filtering are 2 issues needed for 
-discussion, the "once and for all" way is to modify crash source code, making 
-it to support variable/if branch/loop features as bash, and exit values for 
-better log filtering. Both need a lot of effort, but only beneficial for 
-automatic testing currently. We need to reach an technological agreement before 
-proceeding the next stage work. Also any feedbacks are welcomed for our current 
-work.
