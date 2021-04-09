@@ -99,7 +99,12 @@ function log_filter()
 # $1: logs file to be filtered
 if [ ! $1 == "" ]; then
         if [ -f $1 ]; then
-                cat $1 | log_filter
+                file $1 | grep "gzip" 2>&1 >/dev/null
+                if [ $? -eq 0 ]; then
+                        zcat $1 | log_filter
+                else
+                        cat $1 | log_filter
+                fi
         else
                 FILENAME=$(basename ${BASH_SOURCE[0]})
                 [[ ! "$1" =~ -.* ]] && echo "$1 not exist!" 1>&2
