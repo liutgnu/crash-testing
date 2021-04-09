@@ -282,7 +282,19 @@ function output_final_and_popup_show_diff()
         echo "Filtered log(smaller in size) diff:"
         echo $DIFF_TOOL $CRASH_FINAL_FILTERED_OUTPUT $CRASH2_FINAL_FILTERED_OUTPUT
         echo "Non-Filtered log(larger in size) diff:"
+        echo "mv $CRASH_FINAL_OUTPUT $CRASH_FINAL_OUTPUT.gz"
+        echo "gunzip $CRASH_FINAL_OUTPUT.gz"
+        echo "mv $CRASH2_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT.gz"
+        echo "gunzip $CRASH2_FINAL_OUTPUT.gz"
         echo $DIFF_TOOL $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT
+        echo
+        echo "All done!"
+    else
+        echo
+        echo "To view logs:"
+        echo "zcat $CRASH_FINAL_OUTPUT"
+        echo "cat $CRASH_FINAL_FILTERED_OUTPUT"
+        echo
         echo "All done!"
     fi
 }
@@ -502,30 +514,30 @@ function invoke_crash()
     # $1:crash path, $2:junk output log path
     source $CURRENT_DIR/template.sh
     # init_template
-    echo "[Test $DUMPLIST_INDEX]" > $2
+    echo "[Test $DUMPLIST_INDEX]" | gzip > $2
     if [ $ARG1 == "live" ]; then
-        echo "[Dumpfile $ARG1]" >> $2
+        echo "[Dumpfile $ARG1]" | gzip >> $2
         SUDO="sudo -E"
         ARG1=""
     else
-        echo "[Dumpfile $ARG1 $ARG2]" >> $2
+        echo "[Dumpfile $ARG1 $ARG2]" | gzip >> $2
     fi
 
     CRASH_CMD="$SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
-    echo $CRASH_CMD | tee -a $2
+    echo $CRASH_CMD | tee >(gzip --stdout >> $2)
 
     cat $MERGED_COMMANDS | \
         sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | 
         # run_template | \
         eval $CRASH_CMD 2>&1 | \
         awk "$TIME_COMMAND" | \
-        tee -a $2 | \
+        tee >(gzip --stdout >> $2) | \
         $CURRENT_DIR/log_filter.sh
     # We want to log and return crash exit code.
     # MUST change with the previous command accordingly.
     EXIT_VAL=${PIPESTATUS[2]}
     # exit_template
-    echo -e "Crash returned with $EXIT_VAL\n" | tee -a $2
+    echo -e "Crash returned with $EXIT_VAL\n" | tee >(gzip --stdout >> $2)
     return $EXIT_VAL
 }
 
