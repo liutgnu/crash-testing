@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Please update the awk regex rules if it cannot identify error logs correctly.
 function log_filter()
 {
     awk -F '[: \\[\\]]' '
@@ -24,7 +25,6 @@ function log_filter()
         ###########################################################
         #        Now we deal with specific test cases             #
         ###########################################################
-
         #alias
         #eg:builtin  man      help
         flag=="alias" && /: alias\]$/          {allow_regx="builtin ";next;}
@@ -352,7 +352,6 @@ function log_filter()
 
         $0 ~ deny_regx                        {printf("%s%s\n",title,$0);title="";next;}
         $0 ~ allow_regx                       {next;}
-
         ###########################################################
         #              End of specific test cases                 #
         ###########################################################

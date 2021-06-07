@@ -31,5 +31,4 @@ command/task
 command/timer
 command/vm
 command/whatis
-#UNSTABLE command/vtop_ptov_validation
 COMMANDLIST_END

@@ -28,7 +28,7 @@ B. test for patch review, which compares the outputs of the current crash and
         -e ~/crash/crash
    You will have /tmp/crash.log and /tmp/crash_filtered.log, which are generated
    by -f, and /tmp/crash2.log and /tmp/crash2_filtered.log, which are generated
-   by -e.
+   by -e. Then you can diff /tmp/crash_filtered.log and /tmp/crash2_filtered.log.
 
 C. test for various commands(as a test module) in crash utility, such as 
    vtop/ptov/rd, etc.
@@ -58,7 +58,7 @@ Basic usage workflow:
 2) Create your dump_list file and put into dump_lists/ directory. The file must 
    be start with line: DUMPLIST_START, must be end with line DUMPLIST_END. Put 
    relative paths of vmcores between DUMPLIST_START and DUMPLIST_END.
-   Eg: dump_lists/my_vmcores_list
+   Eg file dump_lists/my_vmcores_list:
        DUMPLIST_START
        test/vmcore1 test/vmlinux1
        test/vmcore2 test/vmlinux2 --machdep phys_base=ffffffffff200000
@@ -72,14 +72,14 @@ Basic usage workflow:
 3) Then you can have arguments: -D /mnt/davea-vmcores -d dump_lists/my_vmcores_list.
 
 4) Prepare your commands into file within command/.
-   Eg: command/my_command:
+   Eg file command/my_command:
        COMMAND_START
        ascii
        q
        COMMAND_END
 
 5) Prepare your command list file within command_lists/ to index your commands. 
-   Eg: command_lists/my_command_list:
+   Eg file command_lists/my_command_list:
        COMMANDLIST_START
        command/my_command
        COMMANDLIST_END
@@ -96,29 +96,20 @@ Basic usage workflow:
 
 Advanced usage options:
 -----------------------
-A. Print timestamp in log(-t):
-     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
-     command_lists/my_command_list -t
 
-     Eg output:
-     2021-03-10 07:53:13 ORIGIN   ALIAS    COMMAND
-     2021-03-10 07:53:13 builtin  man      help 
-     2021-03-10 07:53:13 builtin  ?        help 
-     2021-03-10 07:53:13 builtin  quit     q 
-
-B. Specify only one command file for testing, not a list of command files:
+A. Specify only one command file for testing, not a list of command files:
     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -b 
     command/my_command
 
-C. Start multi-threads(-u N) to acceralate testing. (-u 4) will start 4 threads 
+B. Start multi-threads(-u N) to acceralate testing. (-u 4) will start 4 threads 
    running at the same time. It can shorten the overall time if you have a long
    list of vmcores.
      ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
      command_lists/my_command_list -u 4
 
-D. You can exit by Ctrl+c whenever, and no logs will be preserved.
+C. You can exit by Ctrl+c whenever, and no logs will be preserved.
 
-E. Pass extra args(-o) to crash when testing. Also for crash2 as well if -e 
+D. Pass extra args(-o) to crash when testing. Also for crash2 as well if -e 
    exits:
      ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
      command_lists/my_command_list -o "--kaslr auto"
@@ -142,49 +133,7 @@ dump_lists/:
 crash_test.sh:
   The main entry for crash-testing.
 
-Future work
------------
-Variable implementation for crash shell. Currently the code is not stable, 
-need future improvement.
-
-Because the internal shell of crash doesn't support variables like bash. Eg 
-you cannot do variable substitution as:
-    virtual_address=$(sym -l | grep -e '(T)\\|(t)' | sed "20p;d" | awk '{print $1}')
-    vtop $virtual_address
-
-None-variable support may be OK for normal use, but it's inconvenient for 
-automatic testing. Because you have to write data as fixed value when programming.
-
-The problem is, when planning to imporve crash internal shell for variable 
-support, there will be a big amount of work to make the internal shell as good 
-as bash. Currently it seems no urgent and not worthy to do when only beneficial 
-for automatic testing.
-
-I have worked on variable implementation in template.sh as a substitute. You can 
-take command/vtop_ptov_validation as reference to get a general view. Basically,
-template.sh works in the middle of cat and crash:
-    cat commandfile | template | crash
-That is, when we create and assign a variable in commandfile as:
-    echo "some_value" > {{variable}}
-when template.sh receive the line, it will create a named pipe(Eg: /tmp/pipe_123) 
-and wait, and pass the modified line to crash at the same time. The modified line 
-will be:
-    echo "some_value" > /tmp/pipe_123
-When crash receive the line, it will do the actual output redirection to the 
-named pipe. Then template can read the value, and replace the variable with the 
-value within following commands if one need to evaluate it:
-    vtop {{variable}} > {{variable2}}
-becomes:
-    vtop "some_value" > /tmp/pipe_123
-
-This method is relatively easy and can work as a workaround to implement 
-variable support. Currently template.sh only support variable assignment and
-evaluation, it doesn't support advanced usage like if branch or for loop:
-
-    @ {{if some_condition}}
-    @     sym -l | grep -e '(T)\\|(t)' | sed "20p;d" | awk '{print $1}' > {{virtual_addr1}}
-    @     vtop {{virtual_addr1}} | sed -n 2p | awk '{print $2}' > {{physical_addr}}
-    @ {{else}}
-          echo "xen hyper doesn't support vtop command!"
-    @ {{endif}}
-    q
+log_filter.sh:
+  It contains awk regex rules to identify if an output log of specific crash command
+  is correct or not. The regex rules should always be updated once it cannot identify
+  a log correctly.
