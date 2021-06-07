@@ -38,7 +38,7 @@ COMMANDS_TOP_DIR=$CURRENT_DIR
 DO_LIVE=FALSE
 DO_LOCAL=FALSE
 VERIFY=FALSE
-TIME_COMMAND='{print $0}'
+# TIME_COMMAND='{print $0}'
 CRASH2=""
 SUDO=
 OPTARGS="-s "
@@ -71,8 +71,8 @@ function print_useage()
     echo "-a           Live test"
     # echo "-l           (Not inplemented)Local test"
     # echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
-    echo "-t           Print timestamp"
-    echo "-T           Print timedelta"
+    # echo "-t           Print timestamp"
+    # echo "-T           Print timedelta"
     echo "-s           Stop on failure"
     # echo "-m           More verbose log output"
     echo "-u <NUM>     Run in NUM concurrency"
@@ -100,10 +100,10 @@ while getopts "f:d:D:C:c:b:alvtTsmu:e:o:" OPT; do
 	        ;;
 	    v) VERIFY=TRUE
 	        ;;
-        t) TIME_COMMAND=$TIMESTAMP
-            ;;
-        T) TIME_COMMAND=$TIMEDELTA
-            ;;
+        # t) TIME_COMMAND=$TIMESTAMP
+        #     ;;
+        # T) TIME_COMMAND=$TIMEDELTA
+        #     ;;
         s) USER_SET_STOP_ON_FAILURE=TRUE
             ;;
         m) VERBOSE_MODE=TRUE
@@ -255,19 +255,20 @@ for TOOL in ${DIFF_TOOLS[@]}; do
     fi
 done
 
+source $CURRENT_DIR/log_filter.sh
 function output_final_and_popup_show_diff()
 {
     if [[ -f $CRASH_INSTANCE_OUTPUT ]]; then
         mv $CRASH_INSTANCE_OUTPUT $CRASH_FINAL_OUTPUT
         echo "Now filtering $CRASH_FINAL_OUTPUT log, please wait..."
-        $CURRENT_DIR/log_filter.sh $CRASH_FINAL_OUTPUT > $CRASH_FINAL_FILTERED_OUTPUT
+        filter_log_file $CRASH_FINAL_OUTPUT > $CRASH_FINAL_FILTERED_OUTPUT
     fi
 
     if [[ ! $CRASH2 == "" ]]; then
         if [[ -f $CRASH2_INSTANCE_OUTPUT ]]; then
             mv $CRASH2_INSTANCE_OUTPUT $CRASH2_FINAL_OUTPUT
             echo "Now filtering $CRASH2_FINAL_OUTPUT log, please wait..."
-            $CURRENT_DIR/log_filter.sh $CRASH2_FINAL_OUTPUT > $CRASH2_FINAL_FILTERED_OUTPUT
+            filter_log_file $CRASH2_FINAL_OUTPUT > $CRASH2_FINAL_FILTERED_OUTPUT
         fi
         if [ ! $DIFF_TOOL == "" ]; then
             echo 
@@ -446,7 +447,11 @@ rm -f $CRASH_INSTANCE_OUTPUT \
 function output_each_command_file()
 {
     # $1: command file $2: output to file
-    ESCAPED_FILENAME=$(echo "$1" | sed 's/\//\\\//g')
+    COMMAND_START_LINE=$(get_linenum_in_file $1 "COMMAND_START")
+    COMMAND_START_LINE=$(($COMMAND_START_LINE + 1))
+    COMMAND_END_LINE=$(get_linenum_in_file $1 "COMMAND_END")
+    COMMAND_END_LINE=$(($COMMAND_END_LINE - 1))
+    check_line_results "COMMAND" $1
 
     # Since each command file start with COMMAND_START
     # and end with exit/q and COMMAND_END. To combine different
@@ -458,6 +463,7 @@ function output_each_command_file()
     # As for complex commands like the ones in command/vtop_ptov_validation,
     # we won't print it out.
     cat $1 | \
+        sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | \
         sed '/^\s*\(exit\|q\)\s*$/d' | \
         sed '/^\s*$/d' | \
         egrep -v "COMMAND_END" | \
@@ -489,7 +495,7 @@ if [[ ! $COMMANDLIST_FILE == "" ]]; then
             echo "Error: command file $COMMANDS_TOP_DIR/$ARG1 not found!" 1>&2
             exit 1
         fi
-        output_each_command_file $ARG1 $MERGED_COMMANDS
+        output_each_command_file $(readlink -f $ARG1) $MERGED_COMMANDS
     done <<< $(cat $COMMANDLIST_FILE | sed -n -e "$COMMANDLIST_START_LINE,"$COMMANDLIST_END_LINE"p")
     cd ~-
 else
@@ -514,25 +520,26 @@ function invoke_crash()
     # $1:crash path, $2:junk output log path
     source $CURRENT_DIR/template.sh
     # init_template
-    echo "[Test $DUMPLIST_INDEX]" | gzip > $2
+    TEST_TITLE="[Test $DUMPLIST_INDEX]\n"
     if [ $ARG1 == "live" ]; then
-        echo "[Dumpfile $ARG1]" | gzip >> $2
+        TEST_TITLE=$TEST_TITLE"[Dumpfile $ARG1]\n"
         SUDO="sudo -E"
         ARG1=""
     else
-        echo "[Dumpfile $ARG1 $ARG2]" | gzip >> $2
+        TEST_TITLE=$TEST_TITLE"[Dumpfile $ARG1 $ARG2]\n"
     fi
 
     CRASH_CMD="$SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
-    echo $CRASH_CMD | tee >(gzip --stdout >> $2)
+    TEST_TITLE=$TEST_TITLE$CRASH_CMD
+    echo -e $TEST_TITLE | tee >(gzip --stdout > $2)
 
     cat $MERGED_COMMANDS | \
         sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | 
         # run_template | \
         eval $CRASH_CMD 2>&1 | \
-        awk "$TIME_COMMAND" | \
+        # awk "$TIME_COMMAND" | \
         tee >(gzip --stdout >> $2) | \
-        $CURRENT_DIR/log_filter.sh
+        log_filter | uniq
     # We want to log and return crash exit code.
     # MUST change with the previous command accordingly.
     EXIT_VAL=${PIPESTATUS[2]}
@@ -576,19 +583,13 @@ do
     fi
 
     DUMPLIST_INDEX=$(($DUMPLIST_INDEX + 1))
-    echo "[Test $DUMPLIST_INDEX]"
-    if [[ $ARG1 == "live" ]]; then
-        echo "[Dumpfile $ARG1]"
-        if [[ $DO_LIVE == FALSE ]]; then
-            echo "WARNING: Skip live test, maybe (-a) not on?"
-            continue
-        fi
-    else
-        echo "[Dumpfile $ARG1 $ARG2]" 
+    if [[ $ARG1 == "live" && $DO_LIVE == FALSE ]]; then
+        echo "WARNING: Skip live test, maybe (-a) not on?"
+        continue
     fi
 
     if [[ $CRASH2 == "" ]]; then
-        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT &
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke &
         PID=$!
         wait -n $PID
         EXIT_VAL=$?
@@ -601,9 +602,9 @@ do
     else
         # Here we compare the outputs of CRASH and CRASH2 are same or not.
         # By put crash and crash2 into background will shorten the overall time.
-        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT &
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke &
         PID[0]=$!
-        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT &
+        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke &
         PID[1]=$!
         for ((i=0;i<2;i++)); do
             wait -n ${PID[$i]}
