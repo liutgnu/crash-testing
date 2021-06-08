@@ -114,6 +114,11 @@ D. Pass extra args(-o) to crash when testing. Also for crash2 as well if -e
      ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
      command_lists/my_command_list -o "--kaslr auto"
 
+E. Local live testing:
+   1) install kernel-debuginfo first
+   2) invoke crash-testing:
+     ./crash_test.sh -a -d dump_lists/live_list -c command_lists/overall_short_output_list
+
 Directory structure
 -------------------
 command/:

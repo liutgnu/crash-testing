@@ -525,8 +525,10 @@ function invoke_crash()
         TEST_TITLE=$TEST_TITLE"[Dumpfile $ARG1]\n"
         SUDO="sudo -E"
         ARG1=""
+        LIVE_FLAG="yes"
     else
         TEST_TITLE=$TEST_TITLE"[Dumpfile $ARG1 $ARG2]\n"
+        LIVE_FLAG="no"
     fi
 
     CRASH_CMD="$SUDO $1 $OPTARGS $ARG1 $ARG2 $EXTRA_ARGS"
@@ -539,7 +541,7 @@ function invoke_crash()
         eval $CRASH_CMD 2>&1 | \
         # awk "$TIME_COMMAND" | \
         tee >(gzip --stdout >> $2) | \
-        log_filter | uniq
+        live_test_filter $LIVE_FLAG | log_filter | uniq
     # We want to log and return crash exit code.
     # MUST change with the previous command accordingly.
     EXIT_VAL=${PIPESTATUS[2]}

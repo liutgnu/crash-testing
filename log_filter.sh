@@ -1,5 +1,25 @@
 #!/bin/bash
 
+function live_test_filter()
+{
+    # In live testing, source code of crash-testing will be included in ENV of
+    # some process, and ps -a will output the ENV of process, then filtered by
+    # log_filter.
+    # That is, the source code of log_filter.sh will be filtered by log_filter,
+    # which is annoying. So we will strip the output of "ps -a" and similar
+    # commands.
+
+    # awk doesn't support look-ahead, so difficult to make regx for "deny all",
+    # so we use a strange pattern for "deny all".
+    awk -v LIVE_FLAG="$1" -F '[: \\[\\]]' '
+        /^\[Dumpfile /              {allow_regx=".*";if($3=="live"){is_live="yes"}else{is_live="no"};print $0;next;}
+        (is_live=="yes" || LIVE_FLAG=="yes") && /: ps -a\]$/ {allow_regx="/\\//\\\\\\/";print $0;next;}
+        /^\[Command /               {allow_regx=".*";print $0;next;}
+        
+        $0 ~ allow_regx             {print $0;}
+    '
+}
+
 # Please update the awk regex rules if it cannot identify error logs correctly.
 function log_filter()
 {
@@ -9,10 +29,10 @@ function log_filter()
         # 2) Meet [Test xx], which indicates new start of the next test.
         # 3) Meet [Command xx], which indicates new allow_regx will come, so
         #       we clear it first.
-        NR==1                       {allow_regx="(?!.*)";deny_regx="(?!.*)";}
-        /\[Command /                {flag=$5;allow_regx="(?!.*)";deny_regx="(?!.*)";title=$0"\n"}
-        /\[Test 1]/                 {print $0;allow_regx="(?!.*)";deny_regx="(?!.*)";title="";next;}
-        /\[Test /                   {printf("\n%s\n",$0);allow_regx="(?!.*)";deny_regx="(?!.*)";title="";next;}
+        NR==1                       {allow_regx="/\\//\\\\\\/";deny_regx="/\\//\\\\\\/";}
+        /\[Command /                {flag=$5;allow_regx="/\\//\\\\\\/";deny_regx="/\\//\\\\\\/";title=$0"\n"}
+        /\[Test 1]/                 {print $0;allow_regx="/\\//\\\\\\/";deny_regx="/\\//\\\\\\/";title="";next;}
+        /\[Test /                   {printf("\n%s\n",$0);allow_regx="/\\//\\\\\\/";deny_regx="/\\//\\\\\\/";title="";next;}
         /\[Dumpfile /               {n=2;}
         n > 0 && n-- >0             {print $0;next;}
 
@@ -82,7 +102,7 @@ function log_filter()
         flag=="dev" && /: dev -d\]$/           {allow_regx="^\\s*[0-9 ]+[a-f0-9]+ ";next;}
         flag=="dev" && /: dev -D\]$/           {allow_regx="^\\s*[0-9 ]+[a-f0-9]+ ";next;}
         #eg:  1    0x2001240          33558464         cxgb4_0000:03:00.4
-        flag=="dev" && /: dev -V\]$/           {allow_regx="^\\s*[0-9]+ |dev: -V option not supported on this dumpfile type";next;}
+        flag=="dev" && /: dev -V\]$/           {allow_regx="^\\s*[0-9]+ |dev: -V option not supported on this dumpfile type|dev: -V option not supported on a live system";next;}
 
         #dis
         #eg:0xffffffff8c208b42 <schedule+18>:	test   %rdx,%rdx
@@ -435,19 +455,15 @@ function output_summary()
         }'
 }
 
-# log_filter.sh can be called alone to filter offline logs.
 # $1: logs file to be filtered
 function filter_log_file()
 {
         if [ -f $1 ]; then
                 file $1 | grep "gzip" 2>&1 >/dev/null
                 if [ $? -eq 0 ]; then
-                        zcat $1 | log_filter | uniq | format_output_for_log_file | output_summary
+                        zcat $1 | live_test_filter | log_filter | uniq | format_output_for_log_file | output_summary
                 else
-                        cat $1 | log_filter | uniq | format_output_for_log_file | output_summary
+                        cat $1 | live_test_filter| log_filter | uniq | format_output_for_log_file | output_summary
                 fi
         fi
 }
-# log_filter.sh can also be used in a pipe:
-# cat file.log | log_filter.sh
-# log_filter | format_output
