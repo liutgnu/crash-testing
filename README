@@ -6,7 +6,7 @@ Quick start:
 A. test for backward-compatibility, which will accepts many dumpfiles and do 
    sanity checks.
    Eg: to test a list of vmcores against a list of crash commands:
-     ./crash_test.sh  \ 
+     $./crash_test.sh  \ 
         -D /mnt/davea-vmcores  \
         -d dump_list/all_list  \ 
         -c command_lists/overall_short_output_list
@@ -20,7 +20,7 @@ A. test for backward-compatibility, which will accepts many dumpfiles and do
 B. test for patch review, which compares the outputs of the current crash and
    the patched crash.
    Eg: to specify 2 crash paths for output log diff:
-     ./crash_test.sh  \
+     $./crash_test.sh  \
         -D /mnt/davea-vmcores  \
         -d dump_list/all_list  \
         -c command_lists/overall_short_output_list  \
@@ -55,9 +55,10 @@ Basic usage workflow:
    It's recommended to make /mnt/davea-vmcores/ and sub-dirs and sub-files 
    read-only before start testing.
 
-2) Create your dump_list file and put into dump_lists/ directory. The file must 
-   be start with line: DUMPLIST_START, must be end with line DUMPLIST_END. Put 
-   relative paths of vmcores between DUMPLIST_START and DUMPLIST_END.
+2.a) Manually create your dump_list file and put into dump_lists/ directory. 
+   The file must be start with line: DUMPLIST_START, must be end with line 
+   DUMPLIST_END. Put relative paths of vmcores between DUMPLIST_START and 
+   DUMPLIST_END.
    Eg file dump_lists/my_vmcores_list:
        DUMPLIST_START
        test/vmcore1 test/vmlinux1
@@ -68,6 +69,13 @@ Basic usage workflow:
    You need to make sure /mnt/davea-vmcores/test/vmcore1 and 
    /mnt/davea-vmcores/test/vmlinux1 are correct absolute paths of your vmcore1
    and vmlinux1.
+
+2.b) Or you can use dumplist_generator.sh to create one automatically:
+     $./dumplist_generator.sh /mnt/davea-vmcores \
+         dump_lists/my_vmcores_list
+   dumplist_generator.sh will scan /mnt/davea-vmcores and its subdirectories, 
+   in order to find vmcore and vmlinux, then put the list in dump_lists/my_vmcores_list.
+   You should manually add case specific extra args to my_vmcores_list if needed.
 
 3) Then you can have arguments: -D /mnt/davea-vmcores -d dump_lists/my_vmcores_list.
 
@@ -87,7 +95,7 @@ Basic usage workflow:
 6) Then you can have arguments: -c command_lists/my_command_list.
 
 7) You can start a simple testing:
-      ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c 
+     $./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c 
       command_lists/my_command_list
 
 8) After testing finishes, you can get /tmp/crash.log, /tmp/crash_filtered.log.
@@ -104,20 +112,20 @@ A. Specify only one command file for testing, not a list of command files:
 B. Start multi-threads(-u N) to acceralate testing. (-u 4) will start 4 threads 
    running at the same time. It can shorten the overall time if you have a long
    list of vmcores.
-     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
-     command_lists/my_command_list -u 4
+     $./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
+      command_lists/my_command_list -u 4
 
 C. You can exit by Ctrl+c whenever, and no logs will be preserved.
 
 D. Pass extra args(-o) to crash when testing. Also for crash2 as well if -e 
    exits:
-     ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
-     command_lists/my_command_list -o "--kaslr auto"
+     $./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
+      command_lists/my_command_list -o "--kaslr auto"
 
 E. Local live testing:
    1) install kernel-debuginfo first
    2) invoke crash-testing:
-     ./crash_test.sh -a -d dump_lists/live_list -c command_lists/overall_short_output_list
+     $./crash_test.sh -a -d dump_lists/live_list -c command_lists/overall_short_output_list
 
 Directory structure
 -------------------
