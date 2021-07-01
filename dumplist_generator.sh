@@ -61,14 +61,15 @@ for DIR in ${SUB_DIRS[@]}; do
 	cd ~-
 
 	if [[ ${#VMLINUX[@]} -gt 1 ]]; then
-		echo "More than 1 vmlinux exist in ${DIR:2}, skipping..." 1>&2
+		echo "More than 1 vmlinux exist in $TOP_DIR/${DIR:2}, skipping..." 1>&2
 		continue
 	fi
 
+	[ $DIR == "./" ] && DIR="" || DIR=${DIR:2}"/"
 	if [[ ${#VMLINUX[@]} -eq 1 && ${#VMCORE[@]} -ne 0 ]]; then
 		for((i=0;i<${#VMCORE[@]};i++)); do
-			[ -z $DUMPLIST_FILE ] && echo ${DIR:2}/${VMCORE[$i]} ${DIR:2}/${VMLINUX[0]} || \
-				echo ${DIR:2}/${VMCORE[$i]} ${DIR:2}/${VMLINUX[0]} >> $DUMPLIST_FILE
+			[ -z $DUMPLIST_FILE ] && echo $DIR${VMCORE[$i]} $DIR${VMLINUX[0]} || \
+				echo $DIR${VMCORE[$i]} $DIR${VMLINUX[0]} >> $DUMPLIST_FILE
 		done
 	fi
 done
