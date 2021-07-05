@@ -4,7 +4,8 @@ function kmem_long_filter(line)
 	#eg:ffffe2fb42773400
 	#eg: 10    4096k  ffff8feadffd2430
 	if (match(line, ": kmem -F\\]$")) {
-		allow_regx="^\\s*[a-f0-9]+|^\\s*[0-9]+ ";
+		allow_regx="^\\s*[a-f0-9]+";
+		allow_regx=allow_regx "|^\\s*[0-9]+ ";
 		next;
 	}
 

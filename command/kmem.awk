@@ -43,7 +43,8 @@ function kmem_filter(line)
 	#eg:27  ffff8feadff4c1b0  ffffe2fb40000000  ffffe2fb43600000   PMO  884736
 	#eg: ffff8feadbb40800   memory3    18000000 - 1fffffff  0    ONLINE  3
 	if (match(line, ": kmem -n\\]$")) {
-		allow_regx="^\\s*[0-9]+ |^\\s*[a-f0-9]+ ";
+		allow_regx="^\\s*[0-9]+ ";
+		allow_regx=allow_regx "|^\\s*[a-f0-9]+ ";
 		next;
 	}
 
@@ -55,7 +56,8 @@ function kmem_filter(line)
 
 	#eg:ffffffff8b1d8ae0    2MB       0       0  hugepages-2048kB
 	if (match(line, ": kmem -h\\]$")) {
-		allow_regx="^\\s*[0-9a-f]+ |option not supported or applicable on this architecture or kernel";
+		allow_regx="^\\s*[0-9a-f]+ ";
+		allow_regx=allow_regx "|option not supported or applicable on this architecture or kernel";
 		next;
 	}
 
@@ -63,7 +65,8 @@ function kmem_filter(line)
 	#eg:kmem: xfs_buf: slab: 37202e6e900 invalid freepointer: b844bab900001d70  <-- invalid
 	if (match(line, ": kmem -s\\]$")) {
 		deny_regx="invalid freepointer";
-		allow_regx="^\\s*[0-9a-f]+ |^\\s*kmem: ";
+		allow_regx="^\\s*[0-9a-f]+ ";
+		allow_regx=allow_regx "|^\\s*kmem: ";
 		next;
 	}
 
@@ -75,7 +78,9 @@ function kmem_filter(line)
 
 	#eg:ffff8feac7d44c00      256       1792      6560    410     4k  filp
 	if (match(line, ": kmem -r\\]$")) {
-		allow_regx="^\\s*[0-9a-f]+ |^\\s*kmem: |option not supported or applicable on this architecture or kernel";
+		allow_regx="^\\s*[0-9a-f]+ ";
+		allow_regx=allow_regx "|^\\s*kmem: ";
+		allow_regx=allow_regx "|option not supported or applicable on this architecture or kernel";
 		next;
 	}
 

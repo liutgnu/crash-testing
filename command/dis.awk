@@ -9,7 +9,8 @@ function dis_filter(line)
 
 	#eg:/usr/src/debug/kernel-4.18.0-3/./include/linux/list.h: 203
 	if (match(line, ": dis -l schedule\\]$")) {
-		allow_regx="^[0-9a-fx]+ <schedule(\\+[0-9]+)?>:|: [0-9]+";
+		allow_regx="^[0-9a-fx]+ <schedule(\\+[0-9]+)?>:";
+		allow_regx=allow_regx "|: [0-9]+";
 		next;
 	}
 

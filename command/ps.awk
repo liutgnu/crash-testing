@@ -71,7 +71,10 @@ function ps_filter(line)
 	#eg:ARG: /usr/local/Tivoli/fusa/ep/bin/linux-ix86/JRE/DMAE/bin/exe/java
 	#eg:ENV:      HAL_PROP_INFO_CAPABILITIES=cpufreq_control
 	if (match(line, ": ps -a\\]$")) {
-		allow_regx="^\\s*PID: [0-9]+\\s+TASK: |^\\s*(ENV:)?\\s*[A-Z_0-9]+=|^\\s*ARG: |ps: cannot access user stack address:";
+		allow_regx="^\\s*PID: [0-9]+\\s+TASK: ";
+		allow_regx=allow_regx "|^\\s*(ENV:)?\\s*[A-Z_0-9]+=";
+		allow_regx=allow_regx "|^\\s*ARG: ";
+		allow_regx=allow_regx "|ps: cannot access user stack address:";
 		next;
 	}
 

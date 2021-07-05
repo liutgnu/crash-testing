@@ -4,7 +4,8 @@ function irq_filter(line)
 	#eg: 23   ffff97587e9bb000  ffff97587f467600  "uhci_hcd:usb3"
 	#eg:                        ffff97587ea16e80  "radeon"
 	if (match(line, ": irq\\]$")) {
-		allow_regx="^\\s*[0-9]+ |^\\s*[0-9a-f]+ ";
+		allow_regx="^\\s*[0-9]+ ";
+		allow_regx=allow_regx "|^\\s*[0-9a-f]+ ";
 		next;
 	}
 
@@ -22,12 +23,18 @@ function irq_filter(line)
 	#eg: 78 ens7f0-TxRx-7        5
 	if (match(line, ": irq -a\\]$")) {
 		allow_regx="^\\s*[0-9 ]+ ";
+		if (match(ARCH, "s390")) {
+			allow_regx=allow_regx "|irq: -a option not supported or applicable on this architecture or kernel"
+		}
 		next;
 	}
 	
 	#eg:231:          0          0 
 	if (match(line, ": irq -s\\]$")) {
 		allow_regx="^\\s*[0-9]+: ";
+		if (match(ARCH, "s390")) {
+			allow_regx=allow_regx "|irq: -s option not supported or applicable on this architecture or kernel"
+		}
 		next;
 	}
 }

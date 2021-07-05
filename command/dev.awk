@@ -10,6 +10,9 @@ function dev_filter(line)
 	#eg:ffff97587e91d3c0  4000-40ff  hpsa
 	if (match(line, ": dev -i\\]$")) {
 		allow_regx="^\\[[a-f0-9]+ \\]";
+		if (match(ARCH, "s390")) {
+			allow_regx=allow_regx "|dev: -i option not supported or applicable on this architecture or kernel";
+		}
 		next;
 	}
 
@@ -32,7 +35,9 @@ function dev_filter(line)
 
 	#eg:  1    0x2001240          33558464         cxgb4_0000:03:00.4
 	if (match(line, ": dev -V\\]$")) {
-		allow_regx="^\\s*[0-9]+ |dev: -V option not supported on this dumpfile type|dev: -V option not supported on a live system";
+		allow_regx="^\\s*[0-9]+ ";
+		allow_regx=allow_regx "|dev: -V option not supported on this dumpfile type";
+		allow_regx=allow_regx "|dev: -V option not supported on a live system";
 		next;
 	}
 }

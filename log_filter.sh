@@ -22,7 +22,9 @@ function live_test_filter()
 
 function log_filter()
 {
-        LC_ALL=C AWKPATH="$CURRENT_DIR/command" awk -F '[: \\[\\]]' -f $CURRENT_DIR/log_filter.awk 
+        # $1: arch
+        LC_ALL=C AWKPATH="$CURRENT_DIR/command" \
+                awk -v ARCH="$1" -F '[: \\[\\]]' -f $CURRENT_DIR/log_filter.awk 
 }
 
 function format_output_for_each_crash_invoke()
@@ -94,9 +96,9 @@ function filter_log_file()
         if [ -f $1 ]; then
                 file $1 | grep "gzip" 2>&1 >/dev/null
                 if [ $? -eq 0 ]; then
-                        zcat $1 | live_test_filter | log_filter | uniq | format_output_for_log_file | output_summary
+                        zcat $1 | live_test_filter | log_filter $(arch) | uniq | format_output_for_log_file | output_summary
                 else
-                        cat $1 | live_test_filter| log_filter | uniq | format_output_for_log_file | output_summary
+                        cat $1 | live_test_filter| log_filter $(arch) | uniq | format_output_for_log_file | output_summary
                 fi
         fi
 }

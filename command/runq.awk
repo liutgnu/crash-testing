@@ -10,7 +10,8 @@ function runq_filter(line)
 	#eg:CPU 0: 2680990637359
 	#eg:       2680986653330  PID: 28228  TASK: ffff880037ca2ac0  COMMAND: "loop"
 	if (match(line, ": runq -t\\]$")) {
-		allow_regx="^\\s*CPU [0-9]+: |^\\s*[0-9]+\\s+PID: ";
+		allow_regx="^\\s*CPU [0-9]+: ";
+		allow_regx=allow_regx "|^\\s*[0-9]+\\s+PID: ";
 		next;
 	}
 
@@ -27,7 +28,9 @@ function runq_filter(line)
 	}
 
 	if (match(line, ": runq -g\\]$")) {
-		allow_regx="^\\s*[A-Z_ ]+:|^\\s*\\[[0-9 ]+\\] PID:|option not supported or applicable on this architecture or kernel";
+		allow_regx="^\\s*[A-Z_ ]+:";
+		allow_regx=allow_regx "|^\\s*\\[[0-9 ]+\\] PID:";
+		allow_regx=allow_regx "|option not supported or applicable on this architecture or kernel";
 		next;
 	}
 

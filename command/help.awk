@@ -35,7 +35,9 @@ function help_filter(line)
 	#eg:   OFFSET(printk_ringbuffer.fail)=72
 	#eg:   Item error[1][0] => position=0x22449c56f size=0x1: 01
 	if (match(line, ": help -D\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:|^\\s*[A-Z]+\\([a-zA-Z_0-9\\.]+\\)=|error(\\[[0-9]+\\])+\\s+=>";
+		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
+		allow_regx=allow_regx "|^\\s*[A-Z]+\\([a-zA-Z_0-9\\.]+\\)=";
+		allow_regx=allow_regx "|error(\\[[0-9]+\\])+\\s+=>";
 		next;
 	}
 
@@ -85,7 +87,9 @@ function help_filter(line)
 	}
 
 	if (match(line, ": help -n\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:|^\\s*[A-Z]+\\([a-zA-Z_0-9\\.]+\\)=|error(\\[[0-9]+\\])+\\s+=>";
+		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
+		allow_regx=allow_regx "|^\\s*[A-Z]+\\([a-zA-Z_0-9\\.]+\\)=";
+		allow_regx=allow_regx "|error(\\[[0-9]+\\])+\\s+=>";
 		next;
 	}
 
@@ -121,22 +125,26 @@ function help_filter(line)
 
 	#eg:[1979] ffff9837f2e30000 (chronyd)
 	if (match(line, ": help -T\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
+		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
+		allow_regx=allow_regx "|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
 		next;
 	}
 
 	if (match(line, ": help -v\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
+		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
+		allow_regx=allow_regx "|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
 		next;
 	}
 
 	if (match(line, ": help -V\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
+		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
+		allow_regx=allow_regx "|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
 		next;
 	}
 
 	if (match(line, ": help -x\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
+		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
+		allow_regx=allow_regx "|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
 		next;
 	}
 

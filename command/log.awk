@@ -7,7 +7,8 @@ function log_filter(line)
 	}
 
 	if (match(line, ": log -T\\]$")) {
-		allow_regx="option not supported or applicable on this architecture or kernel|^\\[.+[0-2][0-9]:[0-5][0-9]:[0-5][0-9].+\\]";
+		allow_regx="option not supported or applicable on this architecture or kernel";
+		allow_regx=allow_regx "|^\\[.+[0-2][0-9]:[0-5][0-9]:[0-5][0-9].+\\]";
 		next;
 	}
 
@@ -17,7 +18,8 @@ function log_filter(line)
 	}
 
 	if (match(line, ": log -d\\]$")) {
-		allow_regx="option not supported or applicable on this architecture or kernel|^\\[\\s*[0-9]+\\.[0-9]+\\]";
+		allow_regx="option not supported or applicable on this architecture or kernel";
+		allow_regx=allow_regx "|^\\[\\s*[0-9]+\\.[0-9]+\\]";
 		next;
 	}
 
@@ -29,7 +31,8 @@ function log_filter(line)
 	}
 	
 	if (match(line, ": log -a\\]$")) {
-		allow_regx="^type=[0-9]+ audit\\(|option not supported or applicable on this architecture or kernel";
+		allow_regx="^type=[0-9]+ audit\\(";
+		allow_regx=allow_regx "|option not supported or applicable on this architecture or kernel";
 		next;
 	}	
 }

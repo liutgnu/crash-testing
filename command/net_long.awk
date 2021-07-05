@@ -8,7 +8,8 @@ function net_long_filter(line)
 	}
 
 	if (match(line, ": foreach net -s\\]$")) {
-		allow_regx="^\\s*PID: |^\\s*[0-9]+\\s+[0-9a-f]+\\s+[0-9a-f]+";
+		allow_regx="^\\s*PID: ";
+		allow_regx=allow_regx "|^\\s*[0-9]+\\s+[0-9a-f]+\\s+[0-9a-f]+";
 		next;
 	}
 }

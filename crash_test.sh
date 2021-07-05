@@ -541,7 +541,7 @@ function invoke_crash()
         eval $CRASH_CMD 2>&1 | \
         # awk "$TIME_COMMAND" | \
         tee >(gzip --stdout >> $2) | \
-        live_test_filter $LIVE_FLAG | log_filter | uniq
+        live_test_filter $LIVE_FLAG | log_filter $(arch) | uniq
     # We want to log and return crash exit code.
     # MUST change with the previous command accordingly.
     EXIT_VAL=${PIPESTATUS[2]}
