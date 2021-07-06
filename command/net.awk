@@ -7,8 +7,10 @@ function net_filter(line)
 	}
 
 	#eg:ffff8fead9ac9200 0.0.0.0         UNKNOWN    00 00 00 00 00 00  lo      NOARP
+	#eg:3fa348800        172.31.131.162  ETHER      00:00:00:00:00:00  bond0.1861  FAILED
 	if (match(line, ": net -a\\]$")) {
 		allow_regx="^\\s*[a-f0-9]+ [0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+";
+		allow_regx=allow_regx "|\\s+FAILED$"
 		next;
 	}
 
