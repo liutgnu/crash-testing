@@ -8,23 +8,22 @@ THIS_FILE=$CURRENT_DIR/$FILE_NAME
 # Junk output for recording the output of CRASH pid instance of
 # a specific combination of command list and vmcore dump.
 # Final output is report for users.
-CRASH_INSTANCE_OUTPUT="/tmp/.crash.log.$$"
-CRASH_FINAL_OUTPUT="/tmp/crash.log"
-CRASH_FINAL_FILTERED_OUTPUT="/tmp/crash_filtered.log"
-CRASH_INSTANCE_JUNK_OUTPUT="/tmp/.crash_junk.log.$$"
-CRASH2_INSTANCE_OUTPUT="/tmp/.crash2.log.$$"
-CRASH2_FINAL_OUTPUT="/tmp/crash2.log"
-CRASH2_FINAL_FILTERED_OUTPUT="/tmp/crash2_filtered.log"
-CRASH2_INSTANCE_JUNK_OUTPUT="/tmp/.crash2_junk.log.$$"
-MERGED_COMMANDS="/tmp/.merged_commands.log.$$"
+TIMESTAMP=$(date +%Y-%m-%d-%T)
+CRASH_INSTANCE_OUTPUT="/tmp/.crash.log.$TIMESTAMP.$$"
+CRASH_FINAL_OUTPUT="/tmp/crash.log.$TIMESTAMP"
+CRASH_FINAL_FILTERED_OUTPUT="/tmp/crash_filtered.log.$TIMESTAMP"
+CRASH_INSTANCE_JUNK_OUTPUT="/tmp/.crash_junk.log.$TIMESTAMP.$$"
+CRASH2_INSTANCE_OUTPUT="/tmp/.crash2.log.$TIMESTAMP.$$"
+CRASH2_FINAL_OUTPUT="/tmp/crash2.log.$TIMESTAMP"
+CRASH2_FINAL_FILTERED_OUTPUT="/tmp/crash2_filtered.log.$TIMESTAMP"
+CRASH2_INSTANCE_JUNK_OUTPUT="/tmp/.crash2_junk.log.$TIMESTAMP.$$"
+MERGED_COMMANDS="/tmp/.merged_commands.log.$TIMESTAMP.$$"
 COMMANDLIST_INDEX=0
 VERBOSE_MODE=TRUE
 DIFF_TOOL=""
-TIMESTAMP='{print strftime("%F %T"),$0;fflush()}'
-TIMEDELTA='BEGIN{t=systime()}{s=systime();printf("% 3d %s\n",s-t,$0);t=s;fflush()}'
 ALL_ARGS="$@"
-TEMPLATE_PIPE_PREFIX="/tmp/pipe_"
-SPLIT_OUTPUT_PREFIX="/tmp/.crash_dumplist_split."
+# TEMPLATE_PIPE_PREFIX="/tmp/pipe_"
+SPLIT_OUTPUT_PREFIX="/tmp/.crash_dumplist_split.$TIMESTAMP."
 if [[ $DUMPLIST_INDEX == "" ]]; then
     DUMPLIST_INDEX=0
 fi
@@ -71,8 +70,6 @@ function print_useage()
     echo "-a           Live test"
     # echo "-l           (Not inplemented)Local test"
     # echo "-v           (Not inplemented)Need verify the existance of each dumpcore item"
-    # echo "-t           Print timestamp"
-    # echo "-T           Print timedelta"
     echo "-s           Stop on failure"
     # echo "-m           More verbose log output"
     echo "-u <NUM>     Run in NUM concurrency"
@@ -100,10 +97,6 @@ while getopts "f:d:D:C:c:b:alvtTsmu:e:o:" OPT; do
 	        ;;
 	    v) VERIFY=TRUE
 	        ;;
-        # t) TIME_COMMAND=$TIMESTAMP
-        #     ;;
-        # T) TIME_COMMAND=$TIMEDELTA
-        #     ;;
         s) USER_SET_STOP_ON_FAILURE=TRUE
             ;;
         m) VERBOSE_MODE=TRUE
@@ -123,7 +116,7 @@ function delete_tmp_files()
 {
     # Only main process can do tmp-files clean up.
     if [[ ! "$CONCURRENT_SUBPROCESS" == "TRUE" ]]; then
-        rm -f $TEMPLATE_PIPE_PREFIX*
+        # rm -f $TEMPLATE_PIPE_PREFIX*
         rm -f $SPLIT_OUTPUT_PREFIX*
         rm -f `echo $CRASH_INSTANCE_OUTPUT | \
             sed -E "s/.[0-9]+$/.*/"`
