@@ -8,7 +8,9 @@ THIS_FILE=$CURRENT_DIR/$FILE_NAME
 # Junk output for recording the output of CRASH pid instance of
 # a specific combination of command list and vmcore dump.
 # Final output is report for users.
-TIMESTAMP=$(date +%Y-%m-%d-%T)
+if [[ $TIMESTAMP == "" ]]; then
+    export TIMESTAMP=$(date +%Y-%m-%d-%T)
+fi
 CRASH_INSTANCE_OUTPUT="/tmp/.crash.log.$TIMESTAMP.$$"
 CRASH_FINAL_OUTPUT="/tmp/crash.log.$TIMESTAMP"
 CRASH_FINAL_FILTERED_OUTPUT="/tmp/crash_filtered.log.$TIMESTAMP"
