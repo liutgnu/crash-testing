@@ -266,7 +266,10 @@ function output_final_and_popup_show_diff()
         if [ ! $DIFF_TOOL == "" ]; then
             echo 
             echo "---------------------------"
-            echo "Please type the following cmd to view log diff:"
+            echo "Type the following cmd for quick log diff analyze:"
+            echo "$CURRENT_DIR/analyze_log_diff.sh $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT"
+            echo
+            echo "Type the following cmd for manual log diff analyze:"
         else
             echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\""
             echo "Then type the following cmd to view log diff:" 
