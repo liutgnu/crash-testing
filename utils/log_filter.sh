@@ -24,7 +24,7 @@ function log_filter()
 {
         # $1: arch
         LC_ALL=C AWKPATH="$CURRENT_DIR/command" \
-                awk -v ARCH="$1" -F '[: \\[\\]]' -f $CURRENT_DIR/log_filter.awk 
+                awk -v ARCH="$1" -F '[: \\[\\]]' -f $CURRENT_DIR/utils/log_filter.awk 
 }
 
 function format_output_for_each_crash_invoke()

@@ -45,7 +45,7 @@ SUDO=
 OPTARGS="-s "
 USER_SET_STOP_ON_FAILURE=FALSE
 CONCURRENCY=""
-source $CURRENT_DIR/progress.sh "$TIMESTAMP"
+source $CURRENT_DIR/utils/progress.sh "$TIMESTAMP"
 
 function print_useage()
 {
@@ -273,7 +273,7 @@ for TOOL in ${DIFF_TOOLS[@]}; do
     fi
 done
 
-source $CURRENT_DIR/log_filter.sh
+source $CURRENT_DIR/utils/log_filter.sh
 function output_final_and_popup_show_diff()
 {
     if [[ -f $CRASH_INSTANCE_OUTPUT ]]; then
@@ -387,7 +387,7 @@ if [ ! $CONCURRENCY == "" ]; then
     # Each $SPLIT_OUTPUT_PREFIX.x will be feed to this same script and creating
     # a subprocess, thus we will have 3 concurrent subprocesses dealing with 
     # different items of the original dumplist.
-    SPLIT_ARRAY=($($CURRENT_DIR/dumplist_split.sh $DUMPLIST_FILE $CONCURRENCY \
+    SPLIT_ARRAY=($($CURRENT_DIR/utils/dumplist_split.sh $DUMPLIST_FILE $CONCURRENCY \
         $SPLIT_OUTPUT_PREFIX))
     if [ $? -ne 0 ]; then
         exit 1
@@ -545,8 +545,6 @@ check_line_results "COMMAND" $MERGED_COMMANDS
 function invoke_crash()
 {
     # $1:crash path, $2:junk output log path
-    source $CURRENT_DIR/template.sh
-    # init_template
     TEST_TITLE="[Test $DUMPLIST_INDEX]\n"
     if [ $ARG1 == "live" ]; then
         TEST_TITLE=$TEST_TITLE"[Dumpfile $ARG1]\n"
@@ -564,7 +562,6 @@ function invoke_crash()
 
     cat $MERGED_COMMANDS | \
         sed -n -e "$COMMAND_START_LINE,"$COMMAND_END_LINE"p" | 
-        # run_template | \
         eval $CRASH_CMD 2>&1 | \
         # awk "$TIME_COMMAND" | \
         tee >(gzip --stdout >> $2) | \
@@ -572,7 +569,6 @@ function invoke_crash()
     # We want to log and return crash exit code.
     # MUST change with the previous command accordingly.
     EXIT_VAL=${PIPESTATUS[2]}
-    # exit_template
     echo -e "Crash returned with $EXIT_VAL\n" | tee >(gzip --stdout >> $2)
     increase_progress
     return $EXIT_VAL

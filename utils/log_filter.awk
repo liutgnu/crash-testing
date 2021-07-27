@@ -106,6 +106,7 @@ tolower($0) ~ /\<invalid\>/           {printf("%s%s\n",title,$0);title="";next;}
 tolower($0) ~ /unexpect/              {printf("%s%s\n",title,$0);title="";next;}
 tolower($0) ~ /not supported/         {printf("%s%s\n",title,$0);title="";next;}
 tolower($0) ~ /no such file or directory/        {printf("%s%s\n",title,$0);title="";next;}
+tolower($0) ~ /WARNING: possibly bogus exception frame/        {printf("%s%s\n",title,$0);title="";next;}
 /Exit values mismatch/                {print $0;next;}
 /Exit values are not 0/               {print $0;next;}
 /Crash returned with/                 {print $0;next;}
