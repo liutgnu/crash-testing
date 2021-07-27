@@ -45,6 +45,7 @@ SUDO=
 OPTARGS="-s "
 USER_SET_STOP_ON_FAILURE=FALSE
 CONCURRENCY=""
+source $CURRENT_DIR/progress.sh "$TIMESTAMP"
 
 function print_useage()
 {
@@ -97,7 +98,7 @@ while getopts "f:d:D:C:c:b:alvtTsmu:e:o:" OPT; do
 	        ;;
         l) DO_LOCAL=TRUE
 	        ;;
-	    v) VERIFY=TRUE
+        v) VERIFY=TRUE
 	        ;;
         s) USER_SET_STOP_ON_FAILURE=TRUE
             ;;
@@ -130,6 +131,7 @@ function delete_tmp_files()
             sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $MERGED_COMMANDS | \
             sed -E "s/.[0-9]+$/.*/"`
+        clean_progress
     fi
 }
 
@@ -141,6 +143,27 @@ function terminate_and_cleanup()
         trap - SIGTERM SIGINT && kill -- -$$ 2>/dev/null;
     fi
     exit 0
+}
+
+function get_dumplist_list_quantity()
+{
+    # $1: dumplist file
+    local DUMPLIST_START_LINE=$(get_linenum_in_file $1 "DUMPLIST_START")
+    DUMPLIST_START_LINE=$(($DUMPLIST_START_LINE + 1))
+    local DUMPLIST_END_LINE=$(get_linenum_in_file $1 "DUMPLIST_END")
+    DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
+    check_line_results "DUMPLIST" $1
+    local count=0
+
+    while read ARG1 ARG2 EXTRA_ARGS
+    do
+        if [[ $ARG1 == "#"* || $ARG1 == "" || $ARG1 == "DO_NOT_STOP_ON_FAILURE" ]]; then
+            continue
+        fi
+        ((count++))
+    done <<< $(cat $1 | sed -n -e "$DUMPLIST_START_LINE,"$DUMPLIST_END_LINE"p")
+
+    echo $count
 }
 
 # The script will generate subprocesses, so terminate them when we
@@ -302,9 +325,11 @@ function print_message_and_exit()
 {
     # $1: exit value
     if [ $1 -eq 0 ]; then
+     	exit_progress
         echo "Crash test complete!"
         exit 0
     else
+    	exit_progress
         echo "Crash test error occured, please check logs for details" 1>&2
         exit 1
     fi    
@@ -312,6 +337,10 @@ function print_message_and_exit()
 ###############End check difftools####################
 
 delete_tmp_files
+if [[ ! "$CONCURRENT_SUBPROCESS" == "TRUE" ]]; then
+	init_progress
+	export TOTAL_CASES=$(get_dumplist_list_quantity $DUMPLIST_FILE)
+fi
 ###############Start dealing concurrency##############
 function list_process_all_descendants()
 {
@@ -545,6 +574,7 @@ function invoke_crash()
     EXIT_VAL=${PIPESTATUS[2]}
     # exit_template
     echo -e "Crash returned with $EXIT_VAL\n" | tee >(gzip --stdout >> $2)
+    increase_progress
     return $EXIT_VAL
 }
 
@@ -589,7 +619,8 @@ do
     fi
 
     if [[ $CRASH2 == "" ]]; then
-        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke &
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke | \
+            output_progress $TOTAL_CASES &
         PID=$!
         wait -n $PID
         EXIT_VAL=$?
@@ -602,9 +633,11 @@ do
     else
         # Here we compare the outputs of CRASH and CRASH2 are same or not.
         # By put crash and crash2 into background will shorten the overall time.
-        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke &
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke | \
+            output_progress $(($TOTAL_CASES + $TOTAL_CASES)) &
         PID[0]=$!
-        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke &
+        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke | \
+            output_progress $(($TOTAL_CASES + $TOTAL_CASES)) &
         PID[1]=$!
         for ((i=0;i<2;i++)); do
             wait -n ${PID[$i]}
@@ -626,7 +659,6 @@ do
         fi
         # 3rd check: the output junk
         if [ ! "$(sum $CRASH_INSTANCE_JUNK_OUTPUT)" == "$(sum $CRASH2_INSTANCE_JUNK_OUTPUT)" ]; then
-            echo "Crash output mismatch" 1>&2
             FAILURE_FLAG=TRUE
         fi
         # If we are in debug mode or failure occured, persist the output log

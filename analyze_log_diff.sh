@@ -50,7 +50,7 @@ if [ $? -eq 0 ]; then
 	LOG2="<(zcat $LOG2)"
 fi
 
-CMD="diff $LOG1 $LOG2"
+CMD="diff -EZbBw $LOG1 $LOG2"
 
 eval $CMD | awk '
 	function print_array(array, array_len) {
