@@ -21,6 +21,7 @@ function init_progress()
 	if [[ ! -p $NAMED_PIPE_PREFIX_IN &&  ! -p $NAMED_PIPE_PREFIX_OUT ]]; then
 		mkfifo $NAMED_PIPE_PREFIX_IN
 		mkfifo $NAMED_PIPE_PREFIX_OUT
+		touch $PROGRESS_LOCK
 		update_progress &
 		UPDATE_PID=$!
 	fi
