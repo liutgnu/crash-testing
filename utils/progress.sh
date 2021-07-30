@@ -30,8 +30,6 @@ function init_progress()
 function update_progress()
 {
 	CURRENT=0
-	COUNT=1
-	i=0
 	while true; do
 		cmd=$(cat $NAMED_PIPE_IN)
 		case $cmd in
@@ -42,11 +40,7 @@ function update_progress()
 		'e') break
 		;;
 
-		'g') echo $CURRENT > $NAMED_PIPE_OUT
-		     ((COUNT++))
-		;;
-
-		'c') echo $COUNT > $NAMED_PIPE_OUT
+		'g') timeout 2 bash -c "echo $CURRENT > $NAMED_PIPE_OUT"
 		;;
 
 		*)
@@ -60,8 +54,8 @@ function update_progress()
 
 function send_progress()
 {
-	# $1(cmd) must be:'i', 'e', 'g', 'c'
-	if [[ $1 == 'i' || $1 == 'e' || $1 == 'g' || $1 == 'c' ]]; then
+	# $1(cmd) must be:'i', 'e', 'g'
+	if [[ $1 == 'i' || $1 == 'e' || $1 == 'g' ]]; then
 		echo $1 > $NAMED_PIPE_IN
 	fi
 }
@@ -84,7 +78,7 @@ function clean_progress()
 function exit_progress()
 {
 	if [ -p $NAMED_PIPE_IN ]; then
-		send_progress "e"
+		flock $PROGRESS_LOCK -c "end_progress \"e\""
 	fi
 }
 
@@ -92,14 +86,10 @@ function exit_progress()
 function get_progress()
 {
 	if [[ -p $NAMED_PIPE_IN && -p $NAMED_PIPE_OUT ]]; then
-		flock $PROGRESS_LOCK -c "send_progress \"g\"; cat $NAMED_PIPE_OUT"
-	fi
-}
-
-function get_count()
-{
-	if [[ -p $NAMED_PIPE_IN && -p $NAMED_PIPE_OUT ]]; then
-		flock $PROGRESS_LOCK -c "send_progress \"c\"; cat $NAMED_PIPE_OUT" 
+		flock $PROGRESS_LOCK -c "send_progress \"g\"; timeout 2 cat $NAMED_PIPE_OUT"
+		if [ $? -ne 0 ]; then
+			echo 0
+		fi
 	fi
 }
 
@@ -121,16 +111,16 @@ function output_progress()
 		return
 	fi
 	while read -r line; do
-		local count=$(get_count)
-		local cursor_row=$(tput lines)
-		local row=$(($cursor_row - 3 + $count))
-		tput cup $row 0
-		col=$(tput cols)
+		local row=$(tput lines)
+		local col=$(tput cols)
+
+		tput cup $(( $row - 1 )) 0
 		printf "%${col}s\r" ""
 		echo "$line"
 
 		local current_quantity=$(get_progress)
-		tput cup $(( $(tput lines) + 1 )) 0;
+		[ $current_quantity -eq 0 ] && continue
+		tput cup $(( $row + 1 )) 0;
 		echo -ne '\t\t'"Current($current_quantity)/Total($1)"'\r'
 	done
 }
