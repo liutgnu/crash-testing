@@ -78,7 +78,7 @@ function clean_progress()
 function exit_progress()
 {
 	if [ -p $NAMED_PIPE_IN ]; then
-		flock $PROGRESS_LOCK -c "end_progress \"e\""
+		flock $PROGRESS_LOCK -c "send_progress \"e\""
 	fi
 }
 
