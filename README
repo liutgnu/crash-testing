@@ -1,152 +1,160 @@
 crash-testing
 =============
 
+Crash-testing is a tool used for test crash utility.
+
 Quick start:
 ------------
-A. test for backward-compatibility, which will accepts many dumpfiles and do 
-   sanity checks.
-   Eg: to test a list of vmcores against a list of crash commands:
-     $./crash_test.sh  \ 
-        -D /mnt/davea-vmcores  \
-        -d dump_list/all_list  \ 
-        -c command_lists/overall_short_output_list
-   The absolute path of each vmcore will be given by "/mnt/davea-vmcores" +
-   "each line of dump_list/all_list"
-   If -f is not specified, then automatically take $(which crash) by default.
-   You will have /tmp/crash.log and /tmp/crash_filtered.log generated. The
-   former is a complete log recording, the latter is a filtered one in smaller
-   size.
 
-B. test for patch review, which compares the outputs of the current crash and
+The main idea of crash-testing, is to invoke crash utility against a list of vmcores,
+as well as a list of crash utility commands, then collect and analyze the output logs
+of crash utility, to identify whether there are unexpected errors and regressions.
+
+1) Prepare vmcores.
+The more quantity and types of the vmcores, the more chance to find crash utility
+bugs. So collect vmcores as many as possible! If you have a list of vmcores collected,
+the ideal directory structure to arrange is:
+
+my_vmcores
+ |_ x86
+ |_ x86_64
+ |  |_ 3.13.96
+ |  |  |_ vmcore1
+ |  |  |_ vmcore2
+ |  |  |_ vmlinux
+ |  |_ 4.14.2
+ |     |_ vmcore
+ |     |_ vmlinux.gz
+ |_ aarch64
+ |_ ppc
+ |_ etc
+
+2) Index the vmcores.
+You can manually create a dumplist file to index the vmcores or generate one automatically.
+For an automatic example, if you have a vmcore directory as step 1). You can invoke the
+following cmd to create one:
+
+$ cd crash-testing && ./dumplist_generator.sh <path_of_my_vmcores>/x86_64 dumplist.txt
+
+Then the file dumplist.txt which indexing x86_64 vmcores will be created at directory
+crash-testing. 
+
+You can manually create a similar dumplist file, as long as you follow the same format:
+
+DUMPLIST_START
+dir1/vmcore dir1/vmlinux [optional extra crash args]
+dir2/vmcore dir2/vmlinux [optional extra crash args]
+DUMPLIST_END
+
+Please note <path_of_my_vmcores>/x86_64/dir1/vmcore, <path_of_my_vmcores>/x86_64/dir1/vmlinux,
+optional extra crash args will be actually passed to crash cmdline, please make sure these
+arguments are correct.
+
+3) Index crash utility commands.
+Commandlist is used to index the commands which will be passed to crash utility to generate
+output logs. You can index all commands to have a comprehensive testing, or some specific commands
+to have a quick testing. Please refer to the files within crash-testing/command_lists, which have
+a similar format as above:
+
+COMMANDLIST_START
+command/bt
+COMMANDLIST_END
+
+command/bt is located in crash-testing/command. It contains 2 parts:
+a. file bt itself
+b. file bt.awk
+
+The real crash utility commands is in bt file, after they are passed to crash utility, an
+log filter, specified in bt.awk will filter out the generated logs, to identify whether
+there are invalid logs. You can enrich command and corresponding awk file. For a simple testing,
+you don't need to do that.
+
+4) Invoke crash testing.
+a. test for backward-compatibility, which will accepts many dumpfiles and do 
+   sanity checks.
+
+     $./crash_test.sh  \ 
+        -D <path_of_my_vmcores>/x86_64  \
+        -d dumplist.txt  \ 
+        -c command_lists/overall_short_output_list
+
+   If -f is not specified, then automatically take $(which crash) by default.
+   You will have /tmp/crash.log and /tmp/crash_filtered.log generated later.
+
+b. test for patch review, which compares the outputs of the current crash and
    the patched crash.
-   Eg: to specify 2 crash paths for output log diff:
+
      $./crash_test.sh  \
-        -D /mnt/davea-vmcores  \
-        -d dump_list/all_list  \
+        -D <path_of_my_vmcores>/x86_64  \
+        -d dumplist.txt  \
         -c command_lists/overall_short_output_list  \
-        -f /usr/bin/crash  \
-        -e ~/crash/crash
+        -f ~/crash1  \
+        -e ~/crash2
    You will have /tmp/crash.log and /tmp/crash_filtered.log, which are generated
    by -f, and /tmp/crash2.log and /tmp/crash2_filtered.log, which are generated
-   by -e. Then you can diff /tmp/crash_filtered.log and /tmp/crash2_filtered.log.
+   by -e.
 
-C. test for various commands(as a test module) in crash utility, such as 
-   vtop/ptov/rd, etc.
-   command_lists/overall_short_output_list are indexed commands which outputs
-   less log,
-   command_lists/overall_long_output_list are indexed commands which outputs
-   more log, please DO NOT testing it against a long list of vmcores.
+To accerlate crash-testing, you can add -u <NUM> to ./crash_test.sh, to create
+NUM processes running concurrently.
 
-D. output the test results to a file in a specific format.
-   Eg: sample output log
+5) Result analyzing
+These files are crash-testing artifacts:
+/tmp/crash.log (gzip compressed, all outputs preserved)
+/tmp/crash_filtered.log (plain text, filtered by awk rules)
+/tmp/crash2.log (gzip compressed, all outputs preserved)
+/tmp/crash2_filtered.log (plain text, filtered by awk rules)
 
-   [Test 1]                                  ----> vmcore index number
-   [Dumpfile dir1/vmlinux.gz dir1/vmcore]    ----> vmcore path  
-   /usr/bin/crash -s dir1/vmlinux.gz dir1/vmcore   ----> crash command line
-   [Command command/alias: alias]            ----> testing command 1
-   ....                                      ----> command 1 output
-   [Command command/ascii: ascii]            ----> testing command 2
-   ....                                      ----> command 2 output
+The format of the artifacts is like:
 
-Basic usage workflow:
----------------------
-1) Prepare your vmcores into a specific directory. 
-   Eg: /mnt/davea-vmcores
-   It's recommended to make /mnt/davea-vmcores/ and sub-dirs and sub-files 
-   read-only before start testing.
+[Test 1]                                  ----> vmcore index number
+[Dumpfile dir1/vmlinux.gz dir1/vmcore]    ----> vmcore path  
+/usr/bin/crash -s dir1/vmlinux.gz dir1/vmcore   ----> crash command line
+[Command command/alias: alias]            ----> testing command 1
+....                                      ----> command 1 output
+[Command command/ascii: ascii]            ----> testing command 2
+....                                      ----> command 2 output
 
-2.a) Manually create your dump_list file and put into dump_lists/ directory. 
-   The file must be start with line: DUMPLIST_START, must be end with line 
-   DUMPLIST_END. Put relative paths of vmcores between DUMPLIST_START and 
-   DUMPLIST_END.
-   Eg file dump_lists/my_vmcores_list:
-       DUMPLIST_START
-       test/vmcore1 test/vmlinux1
-       test/vmcore2 test/vmlinux2 --machdep phys_base=ffffffffff200000
-                                 # ^
-                                 # |___ put case specific extra args at line end 
-       DUMPLIST_END
-   You need to make sure /mnt/davea-vmcores/test/vmcore1 and 
-   /mnt/davea-vmcores/test/vmlinux1 are correct absolute paths of your vmcore1
-   and vmlinux1.
+There are 3 stages of result analyzing:
 
-2.b) Or you can use dumplist_generator.sh to create one automatically:
-     $./dumplist_generator.sh /mnt/davea-vmcores \
-         dump_lists/my_vmcores_list
-   dumplist_generator.sh will scan /mnt/davea-vmcores and its subdirectories, 
-   in order to find vmcore and vmlinux, then put the list in dump_lists/my_vmcores_list.
-   You should manually add case specific extra args to my_vmcores_list if needed.
+1) View /tmp/crash_filtered.log and /tmp/crash2_filtered.log directly. These logs
+didn't pass the awk filter check, are likely to be an indication of crash utility
+bugs. Further more, you can diff /tmp/crash_filtered.log and /tmp/crash2_filtered.log,
+the differentials are more likely to be a regression.
 
-3) Then you can have arguments: -D /mnt/davea-vmcores -d dump_lists/my_vmcores_list.
+2) If you have a long list of vmcore dumplists, the output logs can be too long to
+analyze. You can invoke the following cmd to have a quick view of log diff. Again,
+the differentials are more likely to be a regression.
 
-4) Prepare your commands into file within command/.
-   Eg file command/my_command:
-       COMMAND_START
-       ascii
-       q
-       COMMAND_END
+$ ./analyze_log_diff.sh /tmp/crash.log /tmp/crash2.log | less
 
-5) Prepare your command list file within command_lists/ to index your commands. 
-   Eg file command_lists/my_command_list:
-       COMMANDLIST_START
-       command/my_command
-       COMMANDLIST_END
+3) If you have a short list of vmcore dumplists, you can directly view the differentials
+by:
 
-6) Then you can have arguments: -c command_lists/my_command_list.
-
-7) You can start a simple testing:
-     $./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c 
-      command_lists/my_command_list
-
-8) After testing finishes, you can get /tmp/crash.log, /tmp/crash_filtered.log.
-   The former is a complete log recording. The latter is a filtered one in 
-   smaller size.
+$ zcat /tmp/crash.log > /tmp/crash.log.uncompressed
+$ zcat /tmp/crash2.log > /tmp/crash2.log.uncompressed
+$ diff /tmp/crash.log.uncompressed /tmp/crash2.log.uncompressed | less
 
 Advanced usage options:
 -----------------------
 
 A. Specify only one command file for testing, not a list of command files:
-    ./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -b 
+    ./crash_test.sh -d dumplist.txt -D <path_of_my_vmcores>/x86_64 -b 
     command/my_command
 
 B. Start multi-threads(-u N) to acceralate testing. (-u 4) will start 4 threads 
    running at the same time. It can shorten the overall time if you have a long
    list of vmcores.
-     $./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
+     $./crash_test.sh -d dumplist.txt -D <path_of_my_vmcores>/x86_64 -c
       command_lists/my_command_list -u 4
 
 C. You can exit by Ctrl+c whenever, and no logs will be preserved.
 
 D. Pass extra args(-o) to crash when testing. Also for crash2 as well if -e 
    exits:
-     $./crash_test.sh -d dump_lists/my_vmcores_list -D /mnt/davea-vmcores -c
+     $./crash_test.sh -d dumplist.txt -D <path_of_my_vmcores>/x86_64 -c
       command_lists/my_command_list -o "--kaslr auto"
 
 E. Local live testing:
    1) install kernel-debuginfo first
    2) invoke crash-testing:
      $./crash_test.sh -a -d dump_lists/live_list -c command_lists/overall_short_output_list
-
-Directory structure
--------------------
-command/:
-  Directory of files for specific crash internal commands testing. Crash support
-  many commands, such as vtop/bt/kmem etc. Each command may have a few arguments
-  to cover. You can enrich your cutomized commands and arguments here.
-
-command_lists/:
-  Directory of files for indexing categories of different command files. This 
-  directory takes files within command/ as basic elements, we can make different
-  categories and combination for specific testing purposes.
-
-dump_lists/:
-  Directory of files for indexing different categories of vmcore files. live_list
-  is used for live testing. You can make your own dump lists based on your vmcores.
-
-crash_test.sh:
-  The main entry for crash-testing.
-
-log_filter.sh:
-  It contains awk regex rules to identify if an output log of specific crash command
-  is correct or not. The regex rules should always be updated once it cannot identify
-  a log correctly.
