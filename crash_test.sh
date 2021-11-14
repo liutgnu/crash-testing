@@ -20,6 +20,7 @@ CRASH2_FINAL_OUTPUT="/tmp/crash2.log.$TIMESTAMP"
 CRASH2_FINAL_FILTERED_OUTPUT="/tmp/crash2_filtered.log.$TIMESTAMP"
 CRASH2_INSTANCE_JUNK_OUTPUT="/tmp/.crash2_junk.log.$TIMESTAMP.$$"
 MERGED_COMMANDS="/tmp/.merged_commands.log.$TIMESTAMP.$$"
+DEFAULT_DUMPLIST_FILE="/tmp/dumplist.$TIMESTAMP.$$"
 COMMANDLIST_INDEX=0
 VERBOSE_MODE=TRUE
 DIFF_TOOL=""
@@ -32,7 +33,7 @@ fi
 
 CRASH=$(which crash)
 DUMPLIST_FILE=""
-DUMPCORE_TOP_DIR=$CURRENT_DIR
+DUMPCORE_TOP_DIR=""
 COMMANDLIST_FILE=""
 COMMAND_FILE=""
 COMMANDS_TOP_DIR=$CURRENT_DIR
@@ -46,6 +47,7 @@ OPTARGS="-s "
 USER_SET_STOP_ON_FAILURE=FALSE
 CONCURRENCY=""
 source $CURRENT_DIR/utils/progress.sh "$TIMESTAMP"
+source $CURRENT_DIR/dumplist_generator.sh
 
 function print_useage()
 {
@@ -53,15 +55,15 @@ function print_useage()
     echo "Useage:"
     echo
     echo "Vmcore test:"
-    echo "  $FILE_NAME [OPTS] [-D <vmcore_dir>] -d <dumplist_file> -c <commandlist_file>"
-    echo "  $FILE_NAME [OPTS] [-D <vmcore_dir>] -d <dumplist_file> -b <command_file>"
+    echo "  $FILE_NAME [OPTS] -D <vmcore_dir> [-d dumplist_file] -c <commandlist_file>"
+    echo "  $FILE_NAME [OPTS] -D <vmcore_dir> [-d dumplist_file] -b <command_file>"
     echo "      vmcore_dir concatenate with item of dumplist_file should be the" 
     echo "      absolute path of vmcore, if items of dumplist_file are relative"
     echo "      paths, then vmcore_dir should be applied."
     echo
     echo "Live test:"
-    echo "  $FILE_NAME [OPTS] -a -d dump_lists/live_list -c <commandlist_file>"
-    echo "  $FILE_NAME [OPTS] -a -d dump_lists/live_list -b <command_file>"
+    echo "  $FILE_NAME [OPTS] -a -c <commandlist_file>"
+    echo "  $FILE_NAME [OPTS] -a -b <command_file>"
     echo
     echo "-f <FILE>    Specify crash, default is \"$(which crash)\" if crash installed"
     echo "-D <DIR>     Specify top dir of vmcore"
@@ -131,9 +133,11 @@ function delete_tmp_files()
             sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $MERGED_COMMANDS | \
             sed -E "s/.[0-9]+$/.*/"`
+	rm -f "$DEFAULT_DUMPLIST_FILE"
         clean_progress
     fi
 }
+delete_tmp_files
 
 function terminate_and_cleanup()
 {
@@ -153,6 +157,8 @@ function get_dumplist_list_quantity()
     local DUMPLIST_END_LINE=$(get_linenum_in_file $1 "DUMPLIST_END")
     DUMPLIST_END_LINE=$(($DUMPLIST_END_LINE - 1))
     check_line_results "DUMPLIST" $1
+    [ $? -eq 1 ] && echo 0 && return
+
     local count=0
 
     while read ARG1 ARG2 EXTRA_ARGS
@@ -172,11 +178,24 @@ trap 'terminate_and_cleanup' SIGTERM SIGINT
 trap "delete_tmp_files" EXIT
 
 ###############Start check inputs####################
-if [[ $DUMPLIST_FILE == "" || ! -f $DUMPLIST_FILE ]]; then
-    echo "Error dumpfile list not exist!" 1>&2
-    print_useage && exit 1
+if [[ $DUMPLIST_FILE == "" ]]; then
+    if [[ $DO_LIVE == "FALSE" ]]; then
+        if [[ -z $DUMPCORE_TOP_DIR ]]; then
+            echo "vmcore_dir is not specified!" 1>&2
+	    print_useage && exit 1
+	fi
+    else
+        DUMPLIST_FILE="$CURRENT_DIR/dump_lists/live_list"
+        DUMPCORE_TOP_DIR="$CURRENT_DIR"
+    fi
+else
+    if [[ -f $DUMPLIST_FILE ]]; then
+	DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
+    else
+        echo "Error dumpfile list \"$DUMPLIST_FILE\" not exist!" 1>&2
+        exit 1
+    fi
 fi
-DUMPLIST_FILE=$(readlink -f $DUMPLIST_FILE)
 
 if [ ! $COMMAND_FILE == "" ]; then
     if [ -f $COMMAND_FILE ]; then
@@ -211,6 +230,7 @@ if [[ $CRASH == "" || ! -x $CRASH ]]; then
     exit 1
 fi
 CRASH=$(readlink -f $CRASH)
+[[ $DO_LIVE == "FALSE" && -z $DUMPLIST_FILE ]] && CRASH_ARCH=$(get_crash_arch $CRASH)
 
 if [[ ! $CRASH2 == "" && ! -x $CRASH2 ]]; then
     echo "Error crash2 path $CRASH2 not exist or executable!" 1>&2
@@ -218,7 +238,18 @@ if [[ ! $CRASH2 == "" && ! -x $CRASH2 ]]; then
 fi
 if [[ ! $CRASH2 == "" ]]; then
     CRASH2=$(readlink -f $CRASH2)
+    [[ $DO_LIVE == "FALSE" && -z $DUMPLIST_FILE ]] && CRASH2_ARCH=$(get_crash_arch $CRASH2)
 fi
+
+[[ $DO_LIVE == "FALSE" && -z $DUMPLIST_FILE ]] && {
+    [[ ! $CRASH2 == "" && ! $CRASH_ARCH == $CRASH2_ARCH ]] && {
+        echo "Arch crash:($CRASH_ARCH) and crash2:($CRASH2_ARCH) are not match!" 1>&2
+        exit 1
+    }
+    DUMPLIST_FILE="$DEFAULT_DUMPLIST_FILE"
+    generate_dumplist $DUMPCORE_TOP_DIR $CRASH_ARCH $DUMPLIST_FILE
+
+}
 
 # CONCURRENCY should be 1,2,3...
 CONCURRENCY_REGX='^[1-9][0-9]*$'
@@ -250,6 +281,7 @@ function check_line_results()
         } 1>&2
         exit 1
     fi
+    [[ ${!VAR1} -gt ${!VAR2} ]] && return 1 || return 0
 }
 export -f check_line_results
 
@@ -336,10 +368,12 @@ function print_message_and_exit()
 }
 ###############End check difftools####################
 
-delete_tmp_files
 if [[ ! "$CONCURRENT_SUBPROCESS" == "TRUE" ]]; then
 	init_progress
 	export TOTAL_CASES=$(get_dumplist_list_quantity $DUMPLIST_FILE)
+	[ $TOTAL_CASES -eq 0 ] && echo \
+	    "Empty dumplist! Please check if crash and vmcores are match in arch." && \
+	    exit 1
 fi
 ###############Start dealing concurrency##############
 function list_process_all_descendants()
