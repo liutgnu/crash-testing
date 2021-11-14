@@ -25,7 +25,6 @@ help -t
 help -T
 help -v
 help -V
-help -x
 help -z
 q
 COMMAND_END

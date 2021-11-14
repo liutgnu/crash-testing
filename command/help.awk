@@ -142,12 +142,6 @@ function help_filter(line)
 		next;
 	}
 
-	if (match(line, ": help -x\\]$")) {
-		allow_regx="^\\s*[a-zA-Z _\\[\\]0-9\\./]+:";
-		allow_regx=allow_regx "|^\\s*\\[[ 0-9]+\\]\\s*[a-z0-9]+";
-		next;
-	}
-
 	#eg: -x - text cache
 	if (match(line, ": help -z\\]$")) {
 		allow_regx="^\\s*-[a-zA-Z]\\s*-";
