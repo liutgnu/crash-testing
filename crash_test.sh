@@ -21,6 +21,9 @@ CRASH2_FINAL_FILTERED_OUTPUT="/tmp/crash2_filtered.log.$TIMESTAMP"
 CRASH2_INSTANCE_JUNK_OUTPUT="/tmp/.crash2_junk.log.$TIMESTAMP.$$"
 MERGED_COMMANDS="/tmp/.merged_commands.log.$TIMESTAMP.$$"
 DEFAULT_DUMPLIST_FILE="/tmp/dumplist.$TIMESTAMP.$$"
+CRASH_INSTANCE_JUNK_OUTPUT_DIFF="/tmp/.crash_diff_junk.log.$TIMESTAMP.$$"
+CRASH_INSTANCE_OUTPUT_DIFF="/tmp/.crash_diff.log.$TIMESTAMP.$$"
+CRASH_FINAL_OUTPUT_DIFF="/tmp/crash_diff.log.$TIMESTAMP"
 COMMANDLIST_INDEX=0
 VERBOSE_MODE=TRUE
 DIFF_TOOL=""
@@ -127,13 +130,18 @@ function delete_tmp_files()
             sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $CRASH2_INSTANCE_OUTPUT | \
             sed -E "s/.[0-9]+$/.*/"`
+	rm -f `echo $CRASH_INSTANCE_OUTPUT_DIFF | \
+	    sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $CRASH_INSTANCE_JUNK_OUTPUT | \
             sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $CRASH2_INSTANCE_JUNK_OUTPUT | \
             sed -E "s/.[0-9]+$/.*/"`
+        rm -f `echo $CRASH_INSTANCE_JUNK_OUTPUT_DIFF | \
+            sed -E "s/.[0-9]+$/.*/"`
         rm -f `echo $MERGED_COMMANDS | \
             sed -E "s/.[0-9]+$/.*/"`
-	rm -f "$DEFAULT_DUMPLIST_FILE"
+	rm -f '/tmp/.difftmp.*'
+        rm -f "$DEFAULT_DUMPLIST_FILE"
         clean_progress
     fi
 }
@@ -317,30 +325,18 @@ function output_final_and_popup_show_diff()
     if [[ ! $CRASH2 == "" ]]; then
         if [[ -f $CRASH2_INSTANCE_OUTPUT ]]; then
             mv $CRASH2_INSTANCE_OUTPUT $CRASH2_FINAL_OUTPUT
+            mv $CRASH_INSTANCE_OUTPUT_DIFF $CRASH_FINAL_OUTPUT_DIFF
             echo "Now filtering $CRASH2_FINAL_OUTPUT log, please wait..."
             filter_log_file $CRASH2_FINAL_OUTPUT > $CRASH2_FINAL_FILTERED_OUTPUT
         fi
-        if [ ! $DIFF_TOOL == "" ]; then
-            echo 
-            echo "---------------------------"
-            echo "Type the following cmd for quick log diff analyze:"
-            echo "$CURRENT_DIR/analyze_log_diff.sh $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT"
-            echo
-            echo "Type the following cmd for manual log diff analyze:"
-        else
-            echo "No diff tools found, please install one of \"${DIFF_TOOLS[@]}\""
-            echo "Then type the following cmd to view log diff:" 
-            DIFF_TOOL="<difftool>"
-        fi
         echo
-        echo "Filtered log(smaller in size) diff:"
-        echo $DIFF_TOOL $CRASH_FINAL_FILTERED_OUTPUT $CRASH2_FINAL_FILTERED_OUTPUT
-        echo "Non-Filtered log(larger in size) diff:"
-        echo "mv $CRASH_FINAL_OUTPUT $CRASH_FINAL_OUTPUT.gz"
-        echo "gunzip $CRASH_FINAL_OUTPUT.gz"
-        echo "mv $CRASH2_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT.gz"
-        echo "gunzip $CRASH2_FINAL_OUTPUT.gz"
-        echo $DIFF_TOOL $CRASH_FINAL_OUTPUT $CRASH2_FINAL_OUTPUT
+        echo "---------------------------"
+        echo "To view the filtered differences for crash and crash2 output:"
+        echo "$CURRENT_DIR/analyze_log_diff.sh -c $CRASH_FINAL_OUTPUT_DIFF"
+        echo "To view the complete differences for crash and crash2 output:"
+        echo "cat $CRASH_FINAL_OUTPUT_DIFF"
+        echo "To regenerate the complete differences:"
+        echo "$CURRENT_DIR/analyze_log_diff.sh -a $CRASH_FINAL_OUTPUT -b $CRASH2_FINAL_OUTPUT -c $CRASH_FINAL_OUTPUT_DIFF"
         echo
         echo "All done!"
     else
@@ -465,6 +461,8 @@ if [ ! $CONCURRENCY == "" ]; then
         if [[ ! $CRASH2 == "" ]]; then
             PREFIX=$(echo $CRASH2_INSTANCE_OUTPUT | rev | cut -d'.' -f2- | rev)
             collect_subprocess_log $PREFIX ${PIDS_ARRAY[$i]} $$
+	    PREFIX=$(echo $CRASH_INSTANCE_OUTPUT_DIFF | rev | cut -d'.' -f2- | rev)
+	    collect_subprocess_log $PREFIX ${PIDS_ARRAY[$i]} $$
         fi
         if [[ $USER_SET_STOP_ON_FAILURE == TRUE && ${EXIT_VAL_ARRAY[$i]} -ne 0 ]]; then
             break
@@ -663,11 +661,9 @@ do
     else
         # Here we compare the outputs of CRASH and CRASH2 are same or not.
         # By put crash and crash2 into background will shorten the overall time.
-        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke | \
-            output_progress $(($TOTAL_CASES + $TOTAL_CASES)) &
+        invoke_crash $CRASH $CRASH_INSTANCE_JUNK_OUTPUT > /dev/null &
         PID[0]=$!
-        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT | format_output_for_each_crash_invoke | \
-            output_progress $(($TOTAL_CASES + $TOTAL_CASES)) &
+        invoke_crash $CRASH2 $CRASH2_INSTANCE_JUNK_OUTPUT > /dev/null &
         PID[1]=$!
         for ((i=0;i<2;i++)); do
             wait -n ${PID[$i]}
@@ -677,20 +673,24 @@ do
         if [ ! "${EXIT_VAL[0]}" == "${EXIT_VAL[1]}" ]; then
             echo "Exit values mismatch, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
                 tee -a $CRASH_INSTANCE_JUNK_OUTPUT | \
-                tee -a $CRASH2_INSTANCE_JUNK_OUTPUT
+                >> $CRASH2_INSTANCE_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
         fi
         # 2nd check: the return value == 0
         if [[ ! ${EXIT_VAL[0]} == 0 || ! ${EXIT_VAL[1]} == 0 ]]; then
             echo "Exit values are not 0, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
                 tee -a $CRASH_INSTANCE_JUNK_OUTPUT | \
-                tee -a $CRASH2_INSTANCE_JUNK_OUTPUT
+                >> $CRASH2_INSTANCE_JUNK_OUTPUT
             FAILURE_FLAG=TRUE
         fi
         # 3rd check: the output junk
-        if [ ! "$(sum $CRASH_INSTANCE_JUNK_OUTPUT)" == "$(sum $CRASH2_INSTANCE_JUNK_OUTPUT)" ]; then
-            FAILURE_FLAG=TRUE
-        fi
+        $CURRENT_DIR/analyze_log_diff.sh -a $CRASH_INSTANCE_JUNK_OUTPUT \
+	    -b $CRASH2_INSTANCE_JUNK_OUTPUT \
+            -c $CRASH_INSTANCE_JUNK_OUTPUT_DIFF | \
+	    output_progress $(($TOTAL_CASES + $TOTAL_CASES))
+	echo "" >> $CRASH_INSTANCE_OUTPUT_DIFF
+	cat $CRASH_INSTANCE_JUNK_OUTPUT_DIFF >> $CRASH_INSTANCE_OUTPUT_DIFF
+
         # If we are in debug mode or failure occured, persist the output log
         if [[ $VERBOSE_MODE == TRUE || $FAILURE_FLAG == TRUE ]]; then
             cat $CRASH_INSTANCE_JUNK_OUTPUT >> $CRASH_INSTANCE_OUTPUT

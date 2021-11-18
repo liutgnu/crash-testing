@@ -23,7 +23,7 @@ usage()
 	echo "   content of test 3"
 	echo
 	echo "\$ $FILE_NAME 2 2 crash.log  #It will extract the content of Test 2" 
-}
+} 1>&2
 
 NUM_REGX='^[1-9]([0-9]+)?$'
 if ! [[ "$2" =~ $NUM_REGX && "$3" =~ $NUM_REGX ]]; then
