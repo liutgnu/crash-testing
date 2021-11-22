@@ -672,15 +672,15 @@ do
         # 1st check: the return value diff
         if [ ! "${EXIT_VAL[0]}" == "${EXIT_VAL[1]}" ]; then
             echo "Exit values mismatch, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
-                tee -a $CRASH_INSTANCE_JUNK_OUTPUT | \
-                >> $CRASH2_INSTANCE_JUNK_OUTPUT
+                tee >(gzip --stdout >> $CRASH_INSTANCE_JUNK_OUTPUT) | \
+                tee >(gzip --stdout >> $CRASH2_INSTANCE_JUNK_OUTPUT) > /dev/null
             FAILURE_FLAG=TRUE
         fi
         # 2nd check: the return value == 0
         if [[ ! ${EXIT_VAL[0]} == 0 || ! ${EXIT_VAL[1]} == 0 ]]; then
             echo "Exit values are not 0, got (CRASH-CRASH2): (${EXIT_VAL[0]}-${EXIT_VAL[1]})!" | \
-                tee -a $CRASH_INSTANCE_JUNK_OUTPUT | \
-                >> $CRASH2_INSTANCE_JUNK_OUTPUT
+                tee >(gzip --stdout >> $CRASH_INSTANCE_JUNK_OUTPUT) | \
+                tee >(gzip --stdout >> $CRASH2_INSTANCE_JUNK_OUTPUT) > /dev/null
             FAILURE_FLAG=TRUE
         fi
         # 3rd check: the output junk
