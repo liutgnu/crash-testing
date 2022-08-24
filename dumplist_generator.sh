@@ -76,18 +76,18 @@ function generate_dumplist()
 		for FILE in $FILES; do
 			FILE_LOWER=$(echo $FILE | tr '[:upper:]' '[:lower:]')
 			if [[ $FILE_LOWER =~ $VMLINUX_REGEX || \
-			$(file -z $FILE) =~ $VMLINUX_REGEX ]]; then
+			$(file -zL $FILE) =~ $VMLINUX_REGEX ]]; then
 				if [[ $FILE_LOWER =~ $ARCH_REGEX || \
-				$(file -z $FILE) =~ $ARCH_REGEX ]]; then
+				$(file -zL $FILE) =~ $ARCH_REGEX ]]; then
 					VMLINUX+=(${FILE:2})
 					continue
 				fi
 			fi
 
 			if [[ $FILE_LOWER =~ $VMCORE_REGEX || \
-			$(file -z $FILE) =~ $VMCORE_REGEX ]]; then
+			$(file -zL $FILE) =~ $VMCORE_REGEX ]]; then
 				if [[ $FILE_LOWER =~ $ARCH_REGEX || \
-				$(file -z $FILE) =~ $ARCH_REGEX ]]; then
+				$(file -zL $FILE) =~ $ARCH_REGEX ]]; then
 					VMCORE+=(${FILE:2})
 				fi
 			fi
